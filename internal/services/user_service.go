@@ -109,11 +109,11 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 		tx.Rollback()
 		return false, err
 	}
-	queryString = `
+	queryString =
+		`
 	        INSERT 
-			INTO
-			    user_roles
-				    (user_id, role_id) 
+			    INTO user_roles
+				(user_id, role_id) 
 	        VALUES
 		        ($1, (SELECT id FROM roles WHERE type = $2))
 	    `
@@ -133,7 +133,7 @@ func (this *UserService) GetRoles(userId int) ([]string, error) {
 	// Get user roles
 	queryString :=
 		`SELECT 
-		    roles.type AS role_name
+		        roles.type AS role_name
 		    FROM 
 		        user_roles
 			LEFT JOIN 
