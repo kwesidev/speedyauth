@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="uft-8" />
+    <title>Login Test</title>
+    <style type="text/css">
+        body {
+            margin: 0 auto;
+            font-family: Arial;
+            background-color: white;
+            color: black;
+        }
+
+        #loginPage {
+            margin: 10% auto;
+            display: block;
+            width: 500px;
+            text-align: center;
+        }
+
+        #loginPage input {
+            margin-bottom: 10px;
+        }
+        #welcomePage {
+            margin: 10% auto;
+            display: block;
+            width: 500px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body onload="init();">
+    <div id="loginPage">
+        <div id="errorMessage" style="color:red;font-size: medium;"></div>
+        <div class="inputContainer">
+            <label>Username</label>
+            <input type="text" name="username" id="username" />
+        </div>
+        <div class="inputContainer">
+            <label>Password</label>
+            <input type="password" name="password" id="password" />
+        </div>
+        <input type="submit" value="Login" onclick="login();" />
+    </div>
+    <div id="welcomePage" style="display:none">
+        <div id="welcomeMessage"></div>
+        <!--
+        <form id="upload-form">
+            <input type="file" name="file" id="file-input">
+            <button type="submit" id="upload-button">Upload</button>
+          </form>
+        -->
+        <button onclick="logout()">Logout</button>
+    </div>
+    <script type="text/javascript" src="/main.js"></script>
+</body>
+
+</html>
