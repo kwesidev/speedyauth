@@ -24,15 +24,15 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 	// Get the list of users
 	queryString :=
 		`SELECT 
-	        users.id,
-            users.username,
-	        users.first_name,
-	        users.last_name,
-	        users.email_address,
-	        users.phone_number,
-	        users.active
-        FROM 
-	        users 
+			users.id,
+			users.username,
+			users.first_name,
+			users.last_name,
+			users.email_address,
+			users.phone_number,
+			users.active
+		FROM 
+			users 
 		OFFSET $1
 		LIMIT $2     
         `
@@ -58,18 +58,18 @@ func (this *UserService) Get(userId int) *models.User {
 	userDetails := &models.User{}
 	queryString :=
 		`SELECT 
-	        users.id,
-            users.username,
-	        users.first_name,
-	        users.last_name,
-	        users.email_address,
-	        users.phone_number,
-	        users.active
-        FROM 
-	        users 
-        WHERE 
-	        users.id = $1      
-        LIMIT 1
+			users.id,
+			users.username,
+			users.first_name,
+			users.last_name,
+			users.email_address,
+			users.phone_number,
+			users.active
+		FROM 
+			users 
+		WHERE 
+			users.id = $1      
+		LIMIT 1
         `
 	row := this.db.QueryRow(queryString, userId)
 	// Inject the data into the struct
@@ -93,12 +93,12 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 	}
 	tx, err := this.db.Begin()
 	queryString := `
-                INSERT INTO users
-                    (username, password, first_name,last_name, email_address, phone_number, active)
-                VALUES
-                    ($1, $2, $3, $4, $5, $6, true) 
-                RETURNING id ;
-            `
+    	INSERT INTO users
+		    (username, password, first_name,last_name, email_address, phone_number, active)
+		VALUES
+			($1, $2, $3, $4, $5, $6, true) 
+		RETURNING id ;`
+
 	row := this.db.QueryRow(queryString, userRegistrationRequest.Username, string(passwordHash),
 		userRegistrationRequest.FirstName, userRegistrationRequest.LastName,
 		userRegistrationRequest.EmailAddress, userRegistrationRequest.CellNumber)
@@ -109,13 +109,12 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 		tx.Rollback()
 		return false, err
 	}
-	queryString =
-		`
-	        INSERT 
-			    INTO user_roles
-				(user_id, role_id) 
-	        VALUES
-		        ($1, (SELECT id FROM roles WHERE type = $2))
+	queryString = `
+	    INSERT 
+		    INTO user_roles
+			(user_id, role_id) 
+	    VALUES
+		    ($1, (SELECT id FROM roles WHERE type = $2))
 	    `
 	_, err = this.db.Exec(queryString, newUserId, "USER")
 	if err != nil {
@@ -131,15 +130,15 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 func (this *UserService) GetRoles(userId int) ([]string, error) {
 	roles := []string{}
 	// Get user roles
-	queryString :=
-		`SELECT 
-		        roles.type AS role_name
-		    FROM 
-		        user_roles
-			LEFT JOIN 
-			    roles ON user_roles.role_id = roles.id 
-		    WHERE 
-			    user_roles.user_id = $1
+	queryString := `
+		SELECT 
+			roles.type AS role_name
+		FROM 
+			user_roles
+		LEFT JOIN 
+			roles ON user_roles.role_id = roles.id 
+		WHERE 
+			user_roles.user_id = $1
 	    `
 	rows, err := this.db.Query(queryString, userId)
 	if err != nil {

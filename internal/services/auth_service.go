@@ -62,9 +62,9 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	queryString :=
 		`INSERT 
 		    INTO user_refresh_tokens
-                (user_id, token, created, ip_address, user_agent, expiry_time)
+            	(user_id, token, created, ip_address, user_agent, expiry_time)
 	        VALUES
-	            ($1, $2 ,NOW() ,$3 ,$4, $5)
+	        	($1, $2 ,NOW() ,$3 ,$4, $5)
 	    `
 	// Generate a jwt and refresh token
 	_, err = this.db.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(30*time.Minute))
@@ -126,10 +126,10 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	}
 	queryString :=
 		`INSERT 
-		    INTO user_refresh_tokens
-                (user_id, token, created, ip_address, user_agent, expiry_time)
+			INTO user_refresh_tokens
+				(user_id, token, created, ip_address, user_agent, expiry_time)
 	        VALUES
-	            ($1, $2 ,NOW() ,$3 ,$4, $5)
+	        	($1, $2 ,NOW() ,$3 ,$4, $5)
 	    `
 	// Generate a jwt and refresh token
 	_, err = this.db.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(30*time.Minute))
