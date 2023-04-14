@@ -27,6 +27,22 @@ uploadButton.addEventListener('click', (event) => {
   }
 });
 */
+// Get cookie 
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
 
 function login() {
     let username, password;
@@ -79,7 +95,7 @@ function refreshToken() {
     });
 }
 function apiRequest(request) {
-    let bodyRequest, xhr, method, path, token;
+    let bodyRequest, xhr, method, path, csrfToken;
     xhr = new XMLHttpRequest();
     if (request.hasOwnProperty('method')) {
         method = request.method;
@@ -95,9 +111,9 @@ function apiRequest(request) {
         throw Error('Path is required');
     }
     xhr.open(method, path, true);
-    token = window.localStorage.getItem('token');
-    if (token) {
-        xhr.setRequestHeader("token", token);
+    csrfToken = getCookie('csrfToken');
+    if (csrfToken) {
+        xhr.setRequestHeader("csrfToken", csrfToken);
     }
     //Send the proper header information along with the request
     xhr.setRequestHeader("Content-Type", "application/json");

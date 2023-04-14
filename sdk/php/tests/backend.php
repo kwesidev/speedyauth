@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "../phpclient.php";
+
 // Class for handling user responses
 class Response {
     public function __construct()  {
@@ -28,6 +29,33 @@ class Request {
 
     public function getRequest($key) {
         return $_GET[$key];
+    }
+}
+// Csrtoken checks
+class CsrfToken {
+    public static function init() {
+        if (!isset($_COOKIE['csrfToken'])) {
+            $randomString = bin2hex(random_bytes(12));
+            setcookie('csrfToken',$randomString,0,"/","",isset($_SERVER['HTTPS']),false);
+        }
+    }
+    /**
+     * Function to check csrftokens
+     * @return bool
+     */
+    public static function check() : bool {
+        $csrfToken = (string)$_SERVER['HTTP_CSRFTOKEN'];
+        if (isset($csrfToken) && isset($_COOKIE['csrfToken'])) {
+            if ($csrfToken == $_COOKIE['csrfToken']) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
     }
 }
 // Function to login
@@ -70,11 +98,15 @@ function logout() {
         $response->setStatusCode(200)->toJson(['success' => true]);
     }
 }
-
 // Main entry point
 function main() {
-    $request = new Request();
+    CsrfToken::init();
+    $response = new Response();
     $route = $request->getRequest("page");
+    if (!CsrfToken::check()) {
+        $response->setStatusCode(400)->toJson(['errorMessage' => 'Cross site fogery detected']);
+        return;
+    }
     switch ($route) {
         case 'login':
             login();
