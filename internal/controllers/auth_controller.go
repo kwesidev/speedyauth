@@ -90,6 +90,54 @@ func (this *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 	utilities.JSONResponse(w, response)
 }
 
+// Reset Password Request
+func (this *AuthController) PasswordResetRequest(w http.ResponseWriter, r *http.Request) {
+	passwordResetRequest := models.PasswordResetRequest{}
+	err := utilities.GetJsonInput(&passwordResetRequest, r)
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	response := struct {
+		Success bool `json:"success"`
+	}{}
+	success, err := this.authService.ResetPasswordRequest(passwordResetRequest.Username)
+	if err != nil {
+		utilities.JSONError(w, "Failed to Send Reset password Request ", http.StatusBadRequest)
+		return
+	}
+	response.Success = success
+	utilities.JSONResponse(w, response)
+}
+
+// Verify and update the password
+func (this *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r *http.Request) {
+	verifyAndChangePasswordRequest := models.VerifyChangePasswordRequest{}
+	err := utilities.GetJsonInput(&verifyAndChangePasswordRequest, r)
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Validates requests
+	err = this.validate.Struct(verifyAndChangePasswordRequest)
+	if err != nil {
+		log.Println(err)
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	response := struct {
+		Success bool `json:"success"`
+	}{}
+	success, err := this.authService.VerifyAndSetNewPassword(verifyAndChangePasswordRequest.Code, verifyAndChangePasswordRequest.Password)
+	if err != nil {
+		utilities.JSONError(w, "Failed to Update Password ", http.StatusBadRequest)
+		return
+	}
+	response.Success = success
+	utilities.JSONResponse(w, response)
+}
+
 // Function register User
 func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	userRegisterationRequest := models.UserRegistrationRequest{}

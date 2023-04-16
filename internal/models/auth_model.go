@@ -18,3 +18,11 @@ type GeneralErrorResponse struct {
 	ErrorMessage string `json:"errorMessage"`
 	Status       int    `json:"status"`
 }
+type PasswordResetRequest struct {
+	Username string `json:"username" validate:"required"`
+}
+
+type VerifyChangePasswordRequest struct {
+	Code     string `json:"code" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}

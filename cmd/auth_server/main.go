@@ -31,6 +31,8 @@ func registerGlobalFunctions() {
 	http.HandleFunc("/api/auth/tokenRefresh", authController.RefreshToken)
 	http.HandleFunc("/api/auth/register", authController.Register)
 	http.HandleFunc("/api/auth/logout", authController.Logout)
+	http.HandleFunc("/api/auth/passwordResetRequest", authController.PasswordResetRequest)
+	http.HandleFunc("/api/auth/verifyAndResetPassword", authController.VerifyAndChangePassword)
 }
 
 // register user functions
@@ -48,7 +50,7 @@ func main() {
 	registerGlobalFunctions()
 	registerAdminFunctions()
 	registerUserFunctions()
-	log.Println("Starting API Server listening for requests on port 8080")
+	log.Println("Starting Auth Server listening for requests on port 8080")
 	// Listen to incoming connections
 	err := http.ListenAndServe(":8080", middlewares.LogRequest(http.DefaultServeMux))
 	// Exit if fail to start service

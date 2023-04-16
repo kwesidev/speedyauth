@@ -1,9 +1,14 @@
 package services
 
 import (
+	"bytes"
 	"database/sql"
 	"errors"
+	"html/template"
 	"log"
+	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kwesidev/authserver/internal/models"
@@ -12,14 +17,16 @@ import (
 )
 
 type AuthService struct {
-	db          *sql.DB
-	userService *UserService
+	db           *sql.DB
+	userService  *UserService
+	emailService *EmailService
 }
 
 func NewAuthService(db *sql.DB) *AuthService {
 	return &AuthService{
-		db:          db,
-		userService: NewUserService(db),
+		db:           db,
+		userService:  NewUserService(db),
+		emailService: NewEmailService(false),
 	}
 }
 
@@ -118,7 +125,7 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 		log.Println(err)
 		return nil, err
 	}
-	_, err = this.db.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1 AND token = $2", userId, oldRefreshToken)
+	_, err = tx.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1 AND token = $2", userId, oldRefreshToken)
 	if err != nil {
 		log.Println(err)
 		tx.Rollback()
@@ -132,7 +139,7 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	        	($1, $2 ,NOW() ,$3 ,$4, $5)
 	    `
 	// Generate a jwt and refresh token
-	_, err = this.db.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(30*time.Minute))
+	_, err = tx.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(30*time.Minute))
 	if err != nil {
 		tx.Rollback()
 		log.Println(err)
@@ -143,4 +150,98 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	authResult.Token = jwtToken
 	authResult.Roles = roles
 	return authResult, nil
+}
+
+func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
+	//check if the username exists and then send vertification code
+	var (
+		userId                      int
+		passwordResetTemplateBuffer bytes.Buffer
+	)
+	row := this.db.QueryRow("SELECT id FROM users where username = $1 OR email_address = $1 ", username)
+	err := row.Scan(&userId)
+	if err != nil {
+		log.Println(err)
+		return false, errors.New("Username or Email Address does not exists")
+	}
+	userDetails := this.userService.Get(userId)
+	if userDetails.Active == false {
+		log.Println(err)
+		return false, errors.New("User is not active so password cannot be reset")
+	}
+	tx, err := this.db.Begin()
+	if err != nil {
+
+		log.Println(err)
+		return false, err
+	}
+	// Generate some random code to be sent to the user for reseting of the password
+	rand.Seed(time.Now().UnixNano())
+	randNumbers := make([]string, 6)
+	for i := range randNumbers {
+		randNumbers[i] = strconv.Itoa(rand.Intn(9))
+	}
+	randomNumberString := strings.Join(randNumbers, "")
+	_, err = tx.Exec("INSERT INTO reset_password_requests(user_id, code, created, expiry_time) values($1, $2, NOW(), $3)", userId, randomNumberString, time.Now().Add(30*time.Minute))
+	if err != nil {
+		tx.Rollback()
+		log.Println(err)
+		return false, err
+	}
+	// Get email template from directory and assign random code to it
+	tmpl := template.Must(template.ParseFiles("static/email_templates/PasswordRequest.html"))
+	randomNumberStruct := struct{ RandomCode string }{}
+	randomNumberStruct.RandomCode = randomNumberString
+	tmpl.Execute(&passwordResetTemplateBuffer, randomNumberStruct)
+	recipient := []string{userDetails.EmailAddress}
+	err = this.emailService.SendEmail(recipient, "Password Reset Request", passwordResetTemplateBuffer.String())
+	if err != nil {
+		log.Println("Email Error", err)
+		tx.Rollback()
+		return false, err
+	}
+	tx.Commit()
+	return true, nil
+}
+
+// VerifyAndSetNewPassword functions to verify and reset password
+func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
+	// Check and see if code exists
+	var userId int
+	tx, err := this.db.Begin()
+	if err != nil {
+		log.Println(err)
+		return false, err
+	}
+	row := tx.QueryRow("SELECT user_id FROM reset_password_requests WHERE code = $1 AND expiry_time >= NOW()", code)
+	row.Scan(&userId)
+	if userId == 0 {
+		log.Println("Invalid Code")
+		return false, errors.New("Code is invalid")
+	}
+	// update password and delete all refresh tokens
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		return false, err
+	}
+	_, err = tx.Exec("UPDATE users SET password = $2 WHERE id = $1", userId, passwordHash)
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return false, err
+	}
+	_, err = tx.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1", userId)
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return false, err
+	}
+	_, err = tx.Exec("DELETE FROM reset_password_requests WHERE user_id = $1", userId)
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return false, err
+	}
+	tx.Commit()
+	return true, nil
 }
