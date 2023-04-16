@@ -99,7 +99,7 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 			($1, $2, $3, $4, $5, $6, true) 
 		RETURNING id ;`
 
-	row := this.db.QueryRow(queryString, userRegistrationRequest.Username, string(passwordHash),
+	row := tx.QueryRow(queryString, userRegistrationRequest.Username, string(passwordHash),
 		userRegistrationRequest.FirstName, userRegistrationRequest.LastName,
 		userRegistrationRequest.EmailAddress, userRegistrationRequest.CellNumber)
 	var newUserId int
@@ -116,7 +116,7 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 	    VALUES
 		    ($1, (SELECT id FROM roles WHERE type = $2))
 	    `
-	_, err = this.db.Exec(queryString, newUserId, "USER")
+	_, err = tx.Exec(queryString, newUserId, "USER")
 	if err != nil {
 		tx.Rollback()
 		log.Println(err)
