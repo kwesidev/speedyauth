@@ -26,7 +26,7 @@ func NewAuthService(db *sql.DB) *AuthService {
 	return &AuthService{
 		db:           db,
 		userService:  NewUserService(db),
-		emailService: NewEmailService(false),
+		emailService: NewEmailService(true),
 	}
 }
 
