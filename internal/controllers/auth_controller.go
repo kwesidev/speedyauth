@@ -46,7 +46,7 @@ func (this *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	authResult, err := this.authService.Login(authRequest.Username, authRequest.Password, "localhost", "App")
+	authResult, err := this.authService.Login(authRequest.Username, authRequest.Password, r.RemoteAddr, r.UserAgent())
 	if err != nil {
 		utilities.JSONError(w, err.Error(), http.StatusForbidden)
 		return
@@ -62,7 +62,7 @@ func (this *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request)
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	refreshResult, err := this.authService.GenerateRefreshToken(tokenRefreshRequest.RefreshToken, "localhost", "App")
+	refreshResult, err := this.authService.GenerateRefreshToken(tokenRefreshRequest.RefreshToken, r.RemoteAddr, r.UserAgent())
 	if err != nil {
 		utilities.JSONError(w, "Failed to generate Token", http.StatusForbidden)
 		return
