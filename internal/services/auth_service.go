@@ -175,6 +175,13 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 		log.Println(err)
 		return false, err
 	}
+	// Delete any requested password requests
+	_, err = tx.Exec("DELETE FROM reset_password_requests WHERE user_id = $1", userId)
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return false, err
+	}
 	// Generate some random code to be sent to the user for reseting of the password
 	rand.Seed(time.Now().UnixNano())
 	randNumbers := make([]string, 6)
@@ -190,9 +197,13 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 	}
 	// Get email template from directory and assign random code to it
 	tmpl := template.Must(template.ParseFiles("static/email_templates/PasswordRequest.html"))
-	randomNumberStruct := struct{ RandomCode string }{}
-	randomNumberStruct.RandomCode = randomNumberString
-	tmpl.Execute(&passwordResetTemplateBuffer, randomNumberStruct)
+	emailTemplateData := struct {
+		FullName   string
+		RandomCode string
+	}{}
+	emailTemplateData.RandomCode = randomNumberString
+	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
+	tmpl.Execute(&passwordResetTemplateBuffer, emailTemplateData)
 	recipient := []string{userDetails.EmailAddress}
 	err = this.emailService.SendEmail(recipient, "Password Reset Request", passwordResetTemplateBuffer.String())
 	if err != nil {
