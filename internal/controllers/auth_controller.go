@@ -64,7 +64,7 @@ func (this *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request)
 	}
 	refreshResult, err := this.authService.GenerateRefreshToken(tokenRefreshRequest.RefreshToken, r.RemoteAddr, r.UserAgent())
 	if err != nil {
-		utilities.JSONError(w, "Failed to generate Token", http.StatusForbidden)
+		utilities.JSONError(w, "Failed to generate Token", http.StatusUnauthorized)
 		return
 	}
 	utilities.JSONResponse(w, refreshResult)
