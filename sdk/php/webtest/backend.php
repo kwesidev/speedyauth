@@ -99,7 +99,7 @@ function refreshToken() {
     enforceRequestMethod('GET');
     CsrfToken::check();
     $response = new Response();
-    if (WebAuthorizationClient::refreshToken()) {
+    if (WebAuthServerClient::refreshToken()) {
         $response->setStatusCode(200)->toJson(['success' => true]);
     }
     else {
