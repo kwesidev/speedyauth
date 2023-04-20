@@ -1,12 +1,13 @@
 CREATE TABLE users(
     id BIGSERIAL NOT NULL PRIMARY KEY,
+    uu_id uuid DEFAULT uuid_generate_v4 (),
     username VARCHAR UNIQUE NOT NULL ,
     password VARCHAR NOT NULL,
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     email_address VARCHAR UNIQUE NOT NULL ,
     phone_number VARCHAR NOT NULL,
-    active BOOLEAN NOT NULL
+    active BOOLEAN NOT NULL,
 );
 
 CREATE TABLE user_refresh_tokens(

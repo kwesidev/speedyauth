@@ -25,6 +25,7 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 	queryString :=
 		`SELECT 
 			users.id,
+			users.uu_id,
 			users.username,
 			users.first_name,
 			users.last_name,
@@ -42,7 +43,7 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 	}
 	for rows.Next() {
 		user := models.User{}
-		rows.Scan(&user.ID, &user.Username, &user.FirstName,
+		rows.Scan(&user.ID, &user.UUID, &user.Username, &user.FirstName,
 			&user.LastName, &user.CellNumber,
 			&user.EmailAddress, &user.Active)
 		roles, _ := this.GetRoles(user.ID)
@@ -59,6 +60,7 @@ func (this *UserService) Get(userId int) *models.User {
 	queryString :=
 		`SELECT 
 			users.id,
+			users.uu_id,
 			users.username,
 			users.first_name,
 			users.last_name,
@@ -73,7 +75,7 @@ func (this *UserService) Get(userId int) *models.User {
         `
 	row := this.db.QueryRow(queryString, userId)
 	// Inject the data into the struct
-	err := row.Scan(&userDetails.ID, &userDetails.Username, &userDetails.FirstName,
+	err := row.Scan(&userDetails.ID, &userDetails.UUID, &userDetails.Username, &userDetails.FirstName,
 		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active)
 	roles, _ := this.GetRoles(userDetails.ID)
 	userDetails.Roles = roles
