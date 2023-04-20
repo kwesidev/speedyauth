@@ -97,6 +97,7 @@ function login() {
 // Function to refresh the token keeping users signed in
 function refreshToken() {
     enforceRequestMethod('GET');
+    CsrfToken::check();
     $response = new Response();
     if (WebAuthorizationClient::refreshToken()) {
         $response->setStatusCode(200)->toJson(['success' => true]);
@@ -107,7 +108,8 @@ function refreshToken() {
 }
 // Function to get details of the logged in user
 function checkme() {
-    enforceRequestMethod('POST');
+    enforceRequestMethod('GET');
+    CsrfToken::check();
     $response = new Response();
     if (!WebAuthServerClient::checkAuth()) {
         $response->setStatusCode(401)->toJson(['success' => false]);
