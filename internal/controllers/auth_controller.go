@@ -48,7 +48,7 @@ func (this *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	authResult, err := this.authService.Login(authRequest.Username, authRequest.Password, r.RemoteAddr, r.UserAgent())
 	if err != nil {
-		utilities.JSONError(w, err.Error(), http.StatusForbidden)
+		utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	utilities.JSONResponse(w, authResult)
