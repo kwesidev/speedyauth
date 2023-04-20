@@ -1,9 +1,9 @@
 <?php 
 /**
- * JwtAuth
- * Jwt Library 
+ * This library communicates directly to the Authentication Server 
+ * This is useful when using it on the Web as tokens will not be stored on clients localstorage or cookie
  */
-class WebAuthorizationClient {
+class WebAuthServerClient {
     const AuthServerUrl = 'http://localhost:8080';
     /**
      * Function to login
@@ -16,7 +16,7 @@ class WebAuthorizationClient {
             'username' => $username,
             'password' => $password,
         ]);
-        curl_setopt($curl, CURLOPT_URL, WebAuthorizationClient::AuthServerUrl."/api/auth/login");
+        curl_setopt($curl, CURLOPT_URL, WebAuthServerClient::AuthServerUrl."/api/auth/login");
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonData);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -24,6 +24,7 @@ class WebAuthorizationClient {
         if (array_key_exists("token", $result)) {
                 $_SESSION['token'] = $result['token'];
                 $_SESSION['refreshToken'] = $result['refreshToken'];
+                $_SESSION['roles'] = $result['roles'];
                 return true;
         }
         return false;
@@ -39,13 +40,14 @@ class WebAuthorizationClient {
             'refreshToken' => $_SESSION['refreshToken']
         ]);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_URL, WebAuthorizationClient::AuthServerUrl . "/api/auth/tokenRefresh");
+        curl_setopt($curl, CURLOPT_URL, WebAuthServerClient::AuthServerUrl . "/api/auth/tokenRefresh");
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonData);
         $result = json_decode(curl_exec($curl) , true);
         if (array_key_exists("token",$result)) {
             $_SESSION['token'] = $result['token'];
             $_SESSION['refreshToken'] = $result['refreshToken'];
+            $_SESSION['roles'] = $result['roles'];
             return true;
         }
         return false;
@@ -61,7 +63,7 @@ class WebAuthorizationClient {
         $token = $_SESSION['token'];
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_URL, WebAuthorizationClient::AuthServerUrl . "/api/user");
+        curl_setopt($curl, CURLOPT_URL, WebAuthServerClient::AuthServerUrl . "/api/user");
         curl_setopt($curl, CURLOPT_HTTPHEADER,array('token:'.$token));
         $result = json_decode(curl_exec($curl),true);
         if (array_key_exists("id",$result)) {
@@ -92,7 +94,7 @@ class WebAuthorizationClient {
         $token = $_SESSION['token'];
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_URL, WebAuthorizationClient::AuthServerUrl . "/api/user");
+        curl_setopt($curl, CURLOPT_URL, WebAuthServerClient::AuthServerUrl . "/api/user");
         curl_setopt($curl, CURLOPT_HTTPHEADER,array('token:'.$token));
         $result = json_decode(curl_exec($curl),true);
         if (array_key_exists("id",$result)) {
@@ -100,6 +102,22 @@ class WebAuthorizationClient {
         }
         else {
             return [];
+        }
+    }
+
+    /**
+     * Function to check if user is admin
+     * @return bool
+     */
+    public static function isUserAdmin() : bool {
+        if (!isset($_SESSION['roles'])) {
+            return false;
+        }
+        if (in_array("ADMIN",$_SESSION['roles'])) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
 }
