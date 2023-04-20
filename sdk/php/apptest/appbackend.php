@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once "../AppAuthServerClient.php";
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: ".$_SERVER['HTTP_ORIGIN']);
 }else {
@@ -9,8 +9,6 @@ header("Access-Control-Allow-Methods: GET,HEAD,OPTIONS,POST,PUT");
 header('Access-Control-Allow-Credentials: true');
 header("Access-Control-Allow-Headers: content-type,token,csrfToken");
 header("Content-Type: application/json; charset=UTF-8");
-require_once "../WebAuthServerClient.php";
-
 // Class for handling user responses
 class Response {
     public function __construct()  {
@@ -21,23 +19,7 @@ class Response {
     }
 
     public function toJson($data)  {
-        header("Content-Type","application/json");
         echo json_encode($data);
-    }
-}
-// class for handling user requests
-class Request {
-    private  $jsonInput;
-    public function __construct() {
-        // Gets json contents and convert to array
-        $this->jsonInput = json_decode(file_get_contents('php://input'),true);
-    }
-    public function getJsonData($key)  {
-        return $this->jsonInput[$key];
-    }
-
-    public function getRequest($key) {
-        return $_GET[$key];
     }
 }
 // Csrtoken checks
@@ -48,6 +30,7 @@ class CsrfToken {
         }
     }
     public static  function generateToken() {
+        error_log("Generating token");
         $randomString = bin2hex(random_bytes(12));
         setcookie('csrfToken',$randomString,0,"/","",isset($_SERVER['HTTPS']),false);
     }
@@ -71,6 +54,21 @@ class CsrfToken {
         die();
     }
 }
+// class for handling user requSests
+class Request {
+    private  $jsonInput;
+    public function __construct() {
+        // Gets json contents and convert to array
+        $this->jsonInput = json_decode(file_get_contents('php://input'),true);
+    }
+    public function getJsonData($key)  {
+        return $this->jsonInput[$key];
+    }
+
+    public function getRequest($key) {
+        return $_GET[$key];
+    }
+}
 // Determine which Request method to use for specific functions
 function enforceRequestMethod(string $type)  {
     if ($_SERVER['REQUEST_METHOD'] !== $type)  {
@@ -87,47 +85,54 @@ function login() {
     $response = new Response();
     $username = (string)$request->getJsonData("username");
     $password = (string)$request->getJsonData("password");
-    $result = WebAuthServerClient::login($username, $password);
-    if (!$result) {
-        $response->setStatusCode(401)->toJson(['errorMessage' => 'Invalid username or password']);
+    $result = AppAuthServerClient::Login($username, $password); 
+    if ($result['success']) {
+        $response->setStatusCode(200)->toJson($result);
     } else {
-        $response->setStatusCode(200)->toJson(['success' => true]);
+        $response->setStatusCode((int)$result['status'])->toJson(['errorMessage' => $result['errorMessage']]);
     }
 }
 // Function to refresh the token keeping users signed in
 function refreshToken() {
     enforceRequestMethod('POST');
+    //CsrfToken::check();
+    $request = new Request();
     $response = new Response();
-    CsrfToken::check();
-    if (WebAuthorizationClient::refreshToken()) {
-        $response->setStatusCode(200)->toJson(['success' => true]);
-    }
-    else {
-        $response->setStatusCode(401)->toJson(['success' => false]);
+    $refreshToken = (string)$request->getJsonData("refreshToken");
+    $result = AppAuthServerClient::refreshToken($refreshToken);
+    if ($result['success']) {
+        $response->setStatusCode(200)->toJson($result);
+    } else {
+        $response->setStatusCode((int)$result['status'])->toJson(['errorMessage' => $result['errorMessage']]);
     }
 }
 // Function to get details of the logged in user
 function checkme() {
     enforceRequestMethod('GET');
     $response = new Response();
-    if (!WebAuthServerClient::checkAuth()) {
+    if (!AppAuthServerClient::checkAuth()) {
         $response->setStatusCode(401)->toJson(['success' => false]);
         return;
     }
-    $result = WebAuthServerClient::getUserDetails();
+    $result = AppAuthServerClient::getUserDetails();
     $response->setStatusCode(200)->toJson($result);
 }
 // Function to logout
 function logout() {
-    CsrfToken::check();
+    enforceRequestMethod('POST');
+    $request = new Request();
     $response = new Response();
-    if (WebAuthServerClient::logout()) {
+    $refreshToken = (string)$request->getJsonData("refreshToken");
+    if (AppAuthServerClient::logout($refreshToken)) {
+        CsrfToken::generateToken(); // Generate new csrfToken
+        $response->setStatusCode(401)->toJson(['success' => false]);
+    } else {
         $response->setStatusCode(200)->toJson(['success' => true]);
     }
+
 }
 // Main entry point
 function main() {
-    CsrfToken::init();
     $request = new Request();
     $route = $request->getRequest("page");
     switch ($route) {
@@ -144,11 +149,10 @@ function main() {
         break;
     
         case 'logout': 
-            // Logout and generate new csrftoken not to keep token for too long
             logout();
-            CsrfToken::generateToken();
         break;
     }
 }
+CsrfToken::init();
 
 main();
