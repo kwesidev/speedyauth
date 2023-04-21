@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE users(
     id BIGSERIAL NOT NULL PRIMARY KEY,
     uu_id uuid DEFAULT uuid_generate_v4 (),
@@ -7,7 +8,7 @@ CREATE TABLE users(
     last_name VARCHAR NOT NULL,
     email_address VARCHAR UNIQUE NOT NULL ,
     phone_number VARCHAR NOT NULL,
-    active BOOLEAN NOT NULL,
+    active BOOLEAN NOT NULL
 );
 
 CREATE TABLE user_refresh_tokens(
