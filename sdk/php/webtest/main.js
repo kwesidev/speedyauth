@@ -67,7 +67,7 @@ function login() {
 function logout() {
     apiRequest({
         path: 'backend.php?page=logout',
-        method: 'GET',
+        method: 'POST',
         onSuccess: function (response) {
             if (response.success) {
                 window.localStorage.clear();

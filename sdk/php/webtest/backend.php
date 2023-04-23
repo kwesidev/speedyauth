@@ -47,7 +47,7 @@ class CsrfToken {
         }
     }
     public static  function generateToken() {
-        $randomString = bin2hex(random_bytes(12));
+        $randomString = bin2hex(random_bytes(100));
         setcookie('csrfToken',$randomString,0,"/","",isset($_SERVER['HTTPS']),false);
     }
     /**
