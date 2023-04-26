@@ -46,7 +46,7 @@ func (this *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	authResult, err := this.authService.Login(authRequest.Username, authRequest.Password, r.RemoteAddr, r.UserAgent())
+	authResult, err := this.authService.Login(authRequest.Username, authRequest.Password, "", "")
 	if err != nil {
 		utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		return
