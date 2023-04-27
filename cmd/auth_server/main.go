@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -50,9 +52,10 @@ func main() {
 	registerGlobalFunctions()
 	registerAdminFunctions()
 	registerUserFunctions()
-	log.Println("Starting Auth Server listening for requests on port 8080")
 	// Listen to incoming connections
-	err := http.ListenAndServe(":8080", middlewares.LogRequest(http.DefaultServeMux))
+	log.Println("Starting Auth Server listening for requests on port " + os.Getenv("SERVER_PORT"))
+	err := http.ListenAndServe(fmt.Sprintf("%s:%s", os.Getenv("SERVER_ADDRESS"), os.Getenv("SERVER_PORT")), middlewares.LogRequest(http.DefaultServeMux))
+
 	// Exit if fail to start service
 	if err != nil {
 		log.Fatal("Failed to start Service ")
