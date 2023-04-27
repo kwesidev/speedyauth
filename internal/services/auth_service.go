@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -20,14 +21,18 @@ type AuthService struct {
 	db           *sql.DB
 	userService  *UserService
 	emailService *EmailService
+	tokenTime    time.Duration
 }
 
 func NewAuthService(db *sql.DB) *AuthService {
+	tokenTime, _ := time.ParseDuration(os.Getenv("TOKEN_EXPIRY_TIME"))
 	return &AuthService{
 		db:           db,
 		userService:  NewUserService(db),
 		emailService: NewEmailService(true),
+		tokenTime:    tokenTime,
 	}
+
 }
 
 // Login function to authenticate user
@@ -59,8 +64,9 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 		log.Println(err)
 		return nil, errors.New("Failed to get roles")
 	}
-	// Generates JWT Token and Refresh token that expires after 30minutes
-	jwtToken, err := utilities.GenerateJwtToken(userId, roles, time.Duration(30*time.Minute))
+	tokenExpiry := time.Duration(this.tokenTime)
+	// Generates JWT Token and Refresh token that expires after xminutes
+	jwtToken, err := utilities.GenerateJwtToken(userId, roles, tokenExpiry)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("Error Generating Access Token")
@@ -74,7 +80,7 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	        	($1, $2 ,NOW() ,$3 ,$4, $5)
 	    `
 	// Generate a jwt and refresh token
-	_, err = this.db.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(30*time.Minute))
+	_, err = this.db.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry))
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("Error Generating Refresh Token")
@@ -82,6 +88,7 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	authResult.RefreshToken = refreshToken
 	authResult.Token = jwtToken
 	authResult.Roles = roles
+	authResult.Expires = int(tokenExpiry.Seconds())
 	return authResult, nil
 }
 
@@ -113,7 +120,9 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 		return nil, errors.New("Your account is not active , contact support ")
 	}
 	roles, _ := this.userService.GetRoles(userId)
-	jwtToken, err := utilities.GenerateJwtToken(userId, roles, time.Duration(30*time.Minute))
+	tokenExpiry := time.Duration(this.tokenTime)
+
+	jwtToken, err := utilities.GenerateJwtToken(userId, roles, time.Duration(tokenExpiry))
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -139,7 +148,7 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	        	($1, $2 ,NOW() ,$3 ,$4, $5)
 	    `
 	// Generate a jwt and refresh token
-	_, err = tx.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(30*time.Minute))
+	_, err = tx.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry))
 	if err != nil {
 		tx.Rollback()
 		log.Println(err)
@@ -149,6 +158,7 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	authResult.RefreshToken = refreshToken
 	authResult.Token = jwtToken
 	authResult.Roles = roles
+	authResult.Expires = int(tokenExpiry.Seconds())
 	return authResult, nil
 }
 
