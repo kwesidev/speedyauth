@@ -32,6 +32,18 @@ func JwtAuth(handler func(w http.ResponseWriter, r *http.Request)) http.HandlerF
 	})
 }
 
+// Method Middleware to specify the type HTTP method a request can handle
+func Method(method string, handler func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != method {
+			utilities.JSONError(w, "This Method Not Allowed", http.StatusBadRequest)
+			return
+		}
+		handler(w, r)
+	})
+}
+
+// Log all request made
 func LogRequest(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
