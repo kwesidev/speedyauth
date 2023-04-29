@@ -16,7 +16,6 @@ services:
     restart: always
     ports:
      - "8080:8080"
-    env_file: ./.env
     environment:
       - PG_HOST=postgresqldb
       - PG_USER=$PG_USER
