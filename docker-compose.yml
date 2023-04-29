@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  postgresqldb:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=$PG_USER
+      - POSTGRES_PASSWORD=$PG_PASSWORD
+      - POSTGRES_DB=$PG_DB
+    volumes:
+       - ./database/initial.sql:/docker-entrypoint-initdb.d/create_tables.sql
+  app:
+    depends_on:
+      - postgresqldb
+    build: .
+    restart: always
+    ports:
+     - "8080:8080"
+    env_file: ./.env
+    environment:
+      - PG_HOST=postgresqldb
+      - PG_USER=$PG_USER
+      - PG_PASSWORD=$PG_PASSWORD
+      - PG_DB=$PG_DB
+      - PG_PORT=$PG_PORT
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=$SMTP_PORT
+      - SERVER_PORT=$SERVER_PORT
+      - SERVER_ADDRESS=$SERVER_ADDRESS
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: always
+    ports:
+      - 1025:1025
+      - 8025:8025
