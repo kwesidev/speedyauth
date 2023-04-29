@@ -206,7 +206,12 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 		return false, err
 	}
 	// Get email template from directory and assign random code to it
-	tmpl := template.Must(template.ParseFiles("static/email_templates/PasswordRequest.html"))
+	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")
+	if err != nil {
+		log.Println("Email Error", err)
+		return false, err
+	}
+	tmpl := template.Must(emailTemplateFile, err)
 	emailTemplateData := struct {
 		FullName   string
 		RandomCode string
@@ -228,6 +233,7 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 // VerifyAndSetNewPassword functions to verify and reset password
 func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
 	// Check and see if code exists
+	const errorMessage string = "Failed to Update password"
 	var userId int
 	tx, err := this.db.Begin()
 	if err != nil {
@@ -243,25 +249,25 @@ func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (
 	// update password and delete all refresh tokens
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
-		return false, err
+		return false, errors.New(errorMessage)
 	}
 	_, err = tx.Exec("UPDATE users SET password = $2 WHERE id = $1", userId, passwordHash)
 	if err != nil {
 		log.Println(err)
 		tx.Rollback()
-		return false, err
+		return false, errors.New(errorMessage)
 	}
 	_, err = tx.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1", userId)
 	if err != nil {
 		log.Println(err)
 		tx.Rollback()
-		return false, err
+		return false, errors.New(errorMessage)
 	}
 	_, err = tx.Exec("DELETE FROM reset_password_requests WHERE user_id = $1", userId)
 	if err != nil {
 		log.Println(err)
 		tx.Rollback()
-		return false, err
+		return false, errors.New(errorMessage)
 	}
 	tx.Commit()
 	return true, nil
