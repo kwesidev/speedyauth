@@ -21,7 +21,7 @@ var databaseConnection *sql.DB
 func initialize() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Not loading Config from .env")
 	}
 	databaseConnection = utilities.GetMainDatabaseConnection()
 }
