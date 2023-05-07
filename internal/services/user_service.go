@@ -2,7 +2,9 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/kwesidev/authserver/internal/models"
 	"golang.org/x/crypto/bcrypt"
@@ -152,5 +154,49 @@ func (this *UserService) GetRoles(userId int) ([]string, error) {
 		roles = append(roles, role)
 	}
 	return roles, nil
+
+}
+
+// Update User
+func (this *UserService) Update(userId int, userUpdateRequest models.UserUpdateRequest) error {
+	query := "UPDATE users SET "
+	var args []any
+	argCount := 1
+	// Update first Name
+	if strings.Trim(userUpdateRequest.FirstName, "") != "" {
+		query += fmt.Sprintf("first_name = $%d, ", argCount)
+		args = append(args, userUpdateRequest.FirstName)
+		argCount++
+	}
+	// Update last Name
+	if strings.Trim(userUpdateRequest.LastName, "") != "" {
+		query += fmt.Sprintf("last_name = $%d, ", argCount)
+		args = append(args, userUpdateRequest.LastName)
+		argCount++
+	}
+	// Update email Address
+	if strings.Trim(userUpdateRequest.EmailAddress, "") != "" {
+		query += fmt.Sprintf("email_address = $%d, ", argCount)
+		args = append(args, userUpdateRequest.EmailAddress)
+		argCount++
+	}
+	// Update cell number
+	if strings.Trim(userUpdateRequest.CellNumber, "") != "" {
+		query += fmt.Sprintf("cell_number =$%d,", argCount)
+		args = append(args, userUpdateRequest.CellNumber)
+		argCount++
+	}
+	// Remove the trailing comma and space
+	query = query[:len(query)-2]
+	query += fmt.Sprintf(" WHERE id = $%d", argCount)
+	args = append(args, userId)
+
+	// Execute the query with the dynamic arguments
+	_, err := this.db.Exec(query, args...)
+	if err != nil {
+		log.Println("Updating user failed ", err)
+		return err
+	}
+	return nil
 
 }

@@ -57,6 +57,7 @@ func (this *APIServer) registerGlobalFunctions() {
 func (this *APIServer) registerUserFunctions() {
 	userController := controllers.NewUserController(this.db)
 	http.HandleFunc("/api/user", middlewares.Method("GET", middlewares.JwtAuth(userController.Index)))
+	http.HandleFunc("/api/user/update", middlewares.Method("POST", middlewares.JwtAuth(userController.Update)))
 }
 
 // register admin functions

@@ -20,3 +20,10 @@ type UserRegistrationRequest struct {
 	LastName     string `json:"lastName" validate:"required"`
 	CellNumber   string `json:"cellNumber" validate:"required"`
 }
+
+type UserUpdateRequest struct {
+	EmailAddress string `json:"emailAddress"`
+	FirstName    string `json:"firstName"`
+	LastName     string `json:"lastName"`
+	CellNumber   string `json:"cellNumber"`
+}
