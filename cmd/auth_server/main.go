@@ -24,6 +24,6 @@ func initialize() {
 }
 func main() {
 	initialize()
-	apiServer := apiserver.NewServer(os.Getenv("SERVER_ADDRESS"), os.Getenv("SERVER_PORT"), databaseConnection)
+	apiServer := apiserver.NewAPIServer(os.Getenv("SERVER_ADDRESS"), os.Getenv("SERVER_PORT"), databaseConnection)
 	apiServer.Run()
 }

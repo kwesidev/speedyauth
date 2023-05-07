@@ -17,8 +17,8 @@ type APIServer struct {
 	db         *sql.DB
 }
 
-// NewServer initializes the api server
-func NewServer(serverName string, port string, db *sql.DB) *APIServer {
+// NewAPIServer initializes the api server
+func NewAPIServer(serverName string, port string, db *sql.DB) *APIServer {
 	return &APIServer{serverName: serverName, port: port, db: db}
 }
 
