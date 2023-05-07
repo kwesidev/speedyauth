@@ -6,5 +6,8 @@ run:
 buildserver:
 	go build ./cmd/auth_server
 
+dockerbuild:
+	docker build -t authserver-app:latest .
+
 clean:
 	rm -rf auth_server
