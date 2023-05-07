@@ -164,3 +164,9 @@ func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	response.Success = regResult
 	utilities.JSONResponse(w, response)
 }
+
+// Health
+func (this *AuthController) Health(w http.ResponseWriter, r *http.Request) {
+
+	utilities.JSONResponse(w, "OKAY")
+}
