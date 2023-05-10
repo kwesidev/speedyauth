@@ -11,7 +11,7 @@ type AuthenticationResponse struct {
 	Token        string   `json:"token"`
 	RefreshToken string   `json:"refreshToken"`
 	Roles        []string `json:"roles"`
-	Expires      int      `json:"expiresIn"`
+	Expires      int      `json:"expires"`
 }
 
 type GeneralErrorResponse struct {
