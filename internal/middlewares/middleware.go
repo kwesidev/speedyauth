@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/kwesidev/authserver/internal/utilities"
 )
@@ -14,9 +15,10 @@ func JwtAuth(handler func(w http.ResponseWriter, r *http.Request)) http.HandlerF
 	const ErrorMessageProvideValidToken string = "Failed provide a valid token in request header as Token"
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get the JWT token from request header
-		providedToken := r.Header.Get("token")
-		if providedToken != "" {
-			claims, err := utilities.ValidateJwtAndGetClaims(providedToken)
+		bearerToken := r.Header.Get("Authorization")
+		token := strings.Replace(bearerToken, "Bearer ", "", -1)
+		if token != "" {
+			claims, err := utilities.ValidateJwtAndGetClaims(token)
 			if err != nil {
 				utilities.JSONError(w, ErrorMessageInvalidToken, http.StatusForbidden)
 				log.Println(ErrorMessageInvalidToken)
