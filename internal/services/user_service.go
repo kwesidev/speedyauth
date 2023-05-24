@@ -100,9 +100,9 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 	tx, err := this.db.Begin()
 	queryString := `
     	INSERT INTO users
-		    (username, password, first_name,last_name, email_address, phone_number, active)
+		    (username, password, first_name,last_name, email_address, phone_number, active, two_factor_enabled)
 		VALUES
-			($1, $2, $3, $4, $5, $6, true) 
+			($1, $2, $3, $4, $5, $6, true, false) 
 		RETURNING id ;`
 
 	row := tx.QueryRow(queryString, userRegistrationRequest.Username, string(passwordHash),
