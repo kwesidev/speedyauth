@@ -264,7 +264,8 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 	for i := range randNumbers {
 		randNumbers[i] = strconv.Itoa(rand.Intn(9))
 	}
-	expires := time.Duration(120 * time.Second)
+	// Expire after 5minutes
+	expires := time.Duration(300 * time.Second)
 	randomCode := strings.Join(randNumbers, "")
 	requestId := utilities.GenerateOpaqueToken(60)
 	queryString :=
@@ -281,7 +282,7 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 		return nil, errors.New("Error Generating Two factor request")
 	}
 	// Get email template from directory and assign random code to it
-	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")
+	emailTemplateFile, err := template.ParseFiles("static/email_templates/TwoFactorLogin.html")
 	if err != nil {
 		tx.Rollback()
 		log.Println("Email Error", err)
@@ -296,7 +297,7 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
 	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
 	recipient := []string{userDetails.EmailAddress}
-	err = this.emailService.SendEmail(recipient, "Two Factor Authentication Request", twoFactorRequestTemplateBuffer.String())
+	err = this.emailService.SendEmail(recipient, "Two-factor login", twoFactorRequestTemplateBuffer.String())
 	if err != nil {
 		log.Println("Email Error", err)
 		tx.Rollback()
