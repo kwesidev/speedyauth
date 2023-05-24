@@ -10,9 +10,9 @@ type TokenRefreshRequest struct {
 
 type AuthenticationResponse struct {
 	Token            string   `json:"token"`
-	RefreshToken     string   `json:"refreshToken"`
-	Roles            []string `json:"roles"`
-	Expires          int      `json:"expiresIn"`
+	RefreshToken     string   `json:"refreshToken,omitempty"`
+	Roles            []string `json:"roles,omitempty"`
+	Expires          int      `json:"expiresIn,omitempty"`
 	TwoFactorEnabled bool     `json:"twoFactorEnabled,omitempty"`
 }
 
