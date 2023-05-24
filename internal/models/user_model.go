@@ -1,15 +1,16 @@
 package models
 
 type User struct {
-	ID           int      `json:"-"`
-	UUID         string   `json:"id"`
-	Username     string   `json:"username"`
-	EmailAddress string   `json:"emailAddress"`
-	FirstName    string   `json:"firstName"`
-	LastName     string   `json:"lastName"`
-	CellNumber   string   `json:"cellNumber"`
-	Roles        []string `json:"roles"`
-	Active       bool     `json:"active"`
+	ID               int      `json:"-"`
+	UUID             string   `json:"id"`
+	Username         string   `json:"username"`
+	EmailAddress     string   `json:"emailAddress"`
+	FirstName        string   `json:"firstName"`
+	LastName         string   `json:"lastName"`
+	CellNumber       string   `json:"cellNumber"`
+	Roles            []string `json:"roles"`
+	Active           bool     `json:"active"`
+	TwoFactorEnabled bool     `json:"twoFactorEnabled"`
 }
 
 type UserRegistrationRequest struct {

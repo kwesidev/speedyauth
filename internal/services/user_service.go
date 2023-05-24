@@ -33,7 +33,8 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 			users.last_name,
 			users.email_address,
 			users.phone_number,
-			users.active
+			users.active,
+			users.two_factor_enabled
 		FROM 
 			users 
 		OFFSET $1
@@ -47,7 +48,7 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 		user := models.User{}
 		rows.Scan(&user.ID, &user.UUID, &user.Username, &user.FirstName,
 			&user.LastName, &user.CellNumber,
-			&user.EmailAddress, &user.Active)
+			&user.EmailAddress, &user.Active, &user.TwoFactorEnabled)
 		roles, _ := this.GetRoles(user.ID)
 		user.Roles = roles
 		users = append(users, user)
@@ -68,7 +69,8 @@ func (this *UserService) Get(userId int) *models.User {
 			users.last_name,
 			users.email_address,
 			users.phone_number,
-			users.active
+			users.active,
+			users.two_factor_enabled
 		FROM 
 			users 
 		WHERE 
@@ -78,7 +80,7 @@ func (this *UserService) Get(userId int) *models.User {
 	row := this.db.QueryRow(queryString, userId)
 	// Inject the data into the struct
 	err := row.Scan(&userDetails.ID, &userDetails.UUID, &userDetails.Username, &userDetails.FirstName,
-		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active)
+		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active, &userDetails.TwoFactorEnabled)
 	roles, _ := this.GetRoles(userDetails.ID)
 	userDetails.Roles = roles
 	if err != nil {

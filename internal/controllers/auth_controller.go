@@ -165,8 +165,31 @@ func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	utilities.JSONResponse(w, response)
 }
 
+// Validates Two Factor this function is only called when two factor is required
+func (this *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http.Request) {
+	twoFactorRequest := models.VerifyTwoFactorRequest{}
+	err := utilities.GetJsonInput(&twoFactorRequest, r)
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Validates requests
+	err = this.validate.Struct(twoFactorRequest)
+	if err != nil {
+		log.Println(err)
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	authResult, err := this.authService.ValidateTwoFactor(twoFactorRequest.Code, twoFactorRequest.RequestId, "", "")
+	if err != nil {
+		utilities.JSONError(w, "Failed to Complete the authentication", http.StatusBadRequest)
+		return
+	}
+	utilities.JSONResponse(w, authResult)
+
+}
+
 // Health
 func (this *AuthController) Health(w http.ResponseWriter, r *http.Request) {
-
 	utilities.JSONResponse(w, "OKAY")
 }

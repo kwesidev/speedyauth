@@ -42,7 +42,6 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 		passwordHash string
 		err          error
 	)
-	authResult := &models.AuthenticationResponse{}
 	row := this.db.QueryRow("SELECT id, password FROM users WHERE username = $1  LIMIT 1 ", username)
 	row.Scan(&userId, &passwordHash)
 	// Check if username is valid
@@ -58,38 +57,18 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	if err != nil {
 		return nil, errors.New("Invalid Password")
 	}
+	// Check if two authentication is required
+	if userDetails.TwoFactorEnabled {
+		return this.twoFactorRequest(*userDetails, ipAddress, userAgent)
+	}
 	// Get user roles
 	roles, err := this.userService.GetRoles(userId)
+	userDetails.Roles = roles
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("Failed to get roles")
 	}
-	tokenExpiry := time.Duration(this.tokenTime)
-	// Generates JWT Token and Refresh token that expires after xminutes
-	jwtToken, err := utilities.GenerateJwtToken(userId, roles, tokenExpiry)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("Error Generating Access Token")
-	}
-	refreshToken := utilities.GenerateOpaqueToken(45)
-	queryString :=
-		`INSERT 
-		    INTO user_refresh_tokens
-            	(user_id, token, created, ip_address, user_agent, expiry_time)
-	        VALUES
-	        	($1, $2 ,NOW() ,$3 ,$4, $5)
-	    `
-	// Generate a jwt and refresh token
-	_, err = this.db.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry))
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("Error Generating Refresh Token")
-	}
-	authResult.RefreshToken = refreshToken
-	authResult.Token = jwtToken
-	authResult.Roles = roles
-	authResult.Expires = int(tokenExpiry.Seconds())
-	return authResult, nil
+	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
 }
 
 // DeleteToken function to delete refresh Token
@@ -181,7 +160,6 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 	}
 	tx, err := this.db.Begin()
 	if err != nil {
-
 		log.Println(err)
 		return false, err
 	}
@@ -271,4 +249,110 @@ func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (
 	}
 	tx.Commit()
 	return true, nil
+}
+
+func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
+	var twoFactorRequestTemplateBuffer bytes.Buffer
+	tx, err := this.db.Begin()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	authResult := &models.AuthenticationResponse{}
+	rand.Seed(time.Now().UnixNano())
+	randNumbers := make([]string, 4)
+	for i := range randNumbers {
+		randNumbers[i] = strconv.Itoa(rand.Intn(9))
+	}
+	expires := time.Duration(120 * time.Second)
+	randomCode := strings.Join(randNumbers, "")
+	requestId := utilities.GenerateOpaqueToken(60)
+	queryString :=
+		`INSERT 
+		    INTO two_factor_requests 
+            	(user_id, request_id, ip_address, code, user_agent, created_at, expiry_time)
+	        VALUES
+	        	($1, $2 ,$3 ,$4, $5, NOW(), $6)
+	    `
+	_, err = tx.Exec(queryString, userDetails.ID, requestId, ipAddress, randomCode, userAgent, time.Now().Add(expires))
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return nil, errors.New("Error Generating Two factor request")
+	}
+	// Get email template from directory and assign random code to it
+	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")
+	if err != nil {
+		tx.Rollback()
+		log.Println("Email Error", err)
+		return nil, err
+	}
+	tmpl := template.Must(emailTemplateFile, err)
+	emailTemplateData := struct {
+		FullName   string
+		RandomCode string
+	}{}
+	emailTemplateData.RandomCode = randomCode
+	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
+	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
+	recipient := []string{userDetails.EmailAddress}
+	err = this.emailService.SendEmail(recipient, "Two Factor Authentication Request", twoFactorRequestTemplateBuffer.String())
+	if err != nil {
+		log.Println("Email Error", err)
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
+	authResult.TwoFactorEnabled = true
+	authResult.Token = requestId
+	return authResult, nil
+}
+
+func (this *AuthService) generateTokenDetails(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
+	authResult := &models.AuthenticationResponse{}
+	tokenExpiry := time.Duration(this.tokenTime)
+	// Generates JWT Token and Refresh token that expires after xminutes
+	jwtToken, err := utilities.GenerateJwtToken(userDetails.ID, userDetails.Roles, tokenExpiry)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error Generating Access Token")
+	}
+	refreshToken := utilities.GenerateOpaqueToken(45)
+	queryString :=
+		`INSERT 
+		    INTO user_refresh_tokens
+            	(user_id, token, created, ip_address, user_agent, expiry_time)
+	        VALUES
+	        	($1, $2 ,NOW() ,$3 ,$4, $5)
+	    `
+	// Generate a jwt and refresh token
+	_, err = this.db.Exec(queryString, userDetails.ID, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry))
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("Error Generating Refresh Token")
+	}
+	authResult.RefreshToken = refreshToken
+	authResult.Token = jwtToken
+	authResult.Roles = userDetails.Roles
+	authResult.Expires = int(tokenExpiry.Seconds())
+	authResult.TwoFactorEnabled = userDetails.TwoFactorEnabled
+	return authResult, nil
+}
+
+// Validate the two factor authentication request and complete the authentication request
+func (this *AuthService) ValidateTwoFactor(code, requestId string, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+	var userId int
+	row := this.db.QueryRow("SELECT user_id FROM two_factor_requests WHERE code = $1 AND request_id = $2 AND expiry_time > NOW() ", code, requestId)
+	row.Scan(&userId)
+	if userId == 0 {
+		log.Println("Invalid Code")
+		return nil, errors.New("Failed to validate")
+	}
+	if _, err := this.db.Exec("DELETE FROM two_factor_requests WHERE code = $1 AND request_id = $2", code, requestId); err != nil {
+		log.Println(err)
+		return nil, errors.New("Failed to validate")
+	}
+	userDetails := this.userService.Get(userId)
+	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
+
 }

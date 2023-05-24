@@ -8,7 +8,19 @@ CREATE TABLE users(
     last_name VARCHAR NOT NULL,
     email_address VARCHAR UNIQUE NOT NULL ,
     phone_number VARCHAR NOT NULL,
-    active BOOLEAN NOT NULL
+    active BOOLEAN NOT NULL,
+    meta_data VARCHAR,
+    two_factor_enabled BOOLEAN 
+);
+CREATE TABLE two_factor_requests(
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) NOT NULL,
+    request_id VARCHAR NOT NULL UNIQUE,
+    ip_address VARCHAR,
+    user_agent VARCHAR,
+    code VARCHAR NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL,
+    expiry_time TIMESTAMP NOT NULL
 );
 
 CREATE TABLE user_refresh_tokens(

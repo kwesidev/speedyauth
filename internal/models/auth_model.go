@@ -7,11 +7,18 @@ type AuthenticationRequest struct {
 type TokenRefreshRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }
+
 type AuthenticationResponse struct {
-	Token        string   `json:"token"`
-	RefreshToken string   `json:"refreshToken"`
-	Roles        []string `json:"roles"`
-	Expires      int      `json:"expiresIn"`
+	Token            string   `json:"token"`
+	RefreshToken     string   `json:"refreshToken"`
+	Roles            []string `json:"roles"`
+	Expires          int      `json:"expiresIn"`
+	TwoFactorEnabled bool     `json:"twoFactorEnabled,omitempty"`
+}
+
+type VerifyTwoFactorRequest struct {
+	RequestId string `json:"requestId" validate:"required"`
+	Code      string `json:"code" validate:"required"`
 }
 
 type GeneralErrorResponse struct {
@@ -19,6 +26,7 @@ type GeneralErrorResponse struct {
 	ErrorMessage string `json:"errorMessage"`
 	Status       int    `json:"status"`
 }
+
 type PasswordResetRequest struct {
 	Username string `json:"username" validate:"required"`
 }

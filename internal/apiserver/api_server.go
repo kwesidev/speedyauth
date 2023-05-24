@@ -50,6 +50,7 @@ func (this *APIServer) registerGlobalFunctions() {
 	http.HandleFunc("/api/auth/logout", middlewares.Method("POST", authController.Logout))
 	http.HandleFunc("/api/auth/passwordResetRequest", middlewares.Method("POST", authController.PasswordResetRequest))
 	http.HandleFunc("/api/auth/verifyAndResetPassword", middlewares.Method("POST", authController.VerifyAndChangePassword))
+	http.HandleFunc("/api/auth/verifyTwoFactor", middlewares.Method("POST", authController.ValidateTwoFactor))
 	http.HandleFunc("/health", authController.Health)
 }
 
