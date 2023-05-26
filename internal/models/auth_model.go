@@ -13,7 +13,7 @@ type AuthenticationResponse struct {
 	RefreshToken     string   `json:"refreshToken,omitempty"`
 	Roles            []string `json:"roles,omitempty"`
 	Expires          int      `json:"expiresIn,omitempty"`
-	TwoFactorEnabled bool     `json:"twoFactorEnabled,omitempty"`
+	TwoFactorEnabled bool     `json:"twoFactorEnabled"`
 }
 
 type VerifyTwoFactorRequest struct {
