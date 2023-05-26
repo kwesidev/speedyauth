@@ -260,7 +260,7 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 	}
 	authResult := &models.AuthenticationResponse{}
 	rand.Seed(time.Now().UnixNano())
-	randNumbers := make([]string, 4)
+	randNumbers := make([]string, 6)
 	for i := range randNumbers {
 		randNumbers[i] = strconv.Itoa(rand.Intn(9))
 	}
