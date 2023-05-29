@@ -71,16 +71,6 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
 }
 
-// DeleteToken function to delete refresh Token
-func (this *AuthService) DeleteToken(refreshToken string) (bool, error) {
-	_, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE refresh_token = $1", refreshToken)
-	if err != nil {
-		log.Println(err)
-		return false, err
-	}
-	return true, nil
-}
-
 // Refresh Token generates a new refresh token that will be used to get a new access token and a refresh token
 func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var (

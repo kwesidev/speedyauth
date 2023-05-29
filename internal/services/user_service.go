@@ -202,3 +202,13 @@ func (this *UserService) Update(userId int, userUpdateRequest models.UserUpdateR
 	return nil
 
 }
+
+// DeleteToken function to delete refresh Token
+func (this *UserService) DeleteToken(userId int, refreshToken string) (bool, error) {
+	_, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE token = $1 AND user_id = $2", refreshToken, userId)
+	if err != nil {
+		log.Println(err)
+		return false, err
+	}
+	return true, nil
+}

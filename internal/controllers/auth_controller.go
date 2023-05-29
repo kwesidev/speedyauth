@@ -70,26 +70,6 @@ func (this *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request)
 	utilities.JSONResponse(w, refreshResult)
 }
 
-// Logout function to logout user
-func (this *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
-	tokenRefreshRequest := models.TokenRefreshRequest{}
-	err := utilities.GetJsonInput(&tokenRefreshRequest, r)
-	if err != nil {
-		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	response := struct {
-		Success bool `json:"success"`
-	}{}
-	success, err := this.authService.DeleteToken(tokenRefreshRequest.RefreshToken)
-	if err != nil {
-		utilities.JSONError(w, "Failed to logout ", http.StatusBadRequest)
-		return
-	}
-	response.Success = success
-	utilities.JSONResponse(w, response)
-}
-
 // Reset Password Request
 func (this *AuthController) PasswordResetRequest(w http.ResponseWriter, r *http.Request) {
 	passwordResetRequest := models.PasswordResetRequest{}

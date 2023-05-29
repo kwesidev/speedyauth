@@ -63,3 +63,27 @@ func (this *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	utilities.JSONResponse(w, response)
 
 }
+
+// Logout function to logout user
+func (this *UserController) Logout(w http.ResponseWriter, r *http.Request) {
+	tokenRefreshRequest := models.TokenRefreshRequest{}
+	err := utilities.GetJsonInput(&tokenRefreshRequest, r)
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	response := struct {
+		Success bool `json:"success"`
+	}{}
+	claims := r.Context().Value("claims").(map[string]interface{})
+	userId := claims["userId"].(int)
+	success, err := this.userService.DeleteToken(userId, tokenRefreshRequest.RefreshToken)
+
+	if err != nil {
+		response.Success = false
+		utilities.JSONError(w, "Failed to register", http.StatusBadRequest)
+		return
+	}
+	response.Success = success
+	utilities.JSONResponse(w, response)
+}
