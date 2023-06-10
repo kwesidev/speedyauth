@@ -23,8 +23,9 @@ type UserRegistrationRequest struct {
 }
 
 type UserUpdateRequest struct {
-	EmailAddress string `json:"emailAddress"`
-	FirstName    string `json:"firstName"`
-	LastName     string `json:"lastName"`
-	CellNumber   string `json:"cellNumber"`
+	EmailAddress                 string `json:"emailAddress"`
+	FirstName                    string `json:"firstName"`
+	LastName                     string `json:"lastName"`
+	CellNumber                   string `json:"cellNumber"`
+	AllowTwoFactorAuthentication bool   `json:"allowTwoFactorAuthentication"`
 }
