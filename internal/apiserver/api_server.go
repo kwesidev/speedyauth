@@ -9,6 +9,7 @@ import (
 
 	"github.com/kwesidev/authserver/internal/controllers"
 	"github.com/kwesidev/authserver/internal/middlewares"
+	"github.com/kwesidev/authserver/internal/services"
 )
 
 type APIServer struct {
@@ -30,6 +31,7 @@ func (this *APIServer) setupRoutes() {
 
 // Run  start serving the http requests
 func (this *APIServer) Run() {
+	this.cleanUp()
 	this.setupRoutes()
 	// Listen to incoming connections
 	log.Println("Starting Auth Server listening for requests on port " + os.Getenv("SERVER_PORT"))
@@ -64,4 +66,13 @@ func (this *APIServer) registerUserFunctions() {
 // register admin functions
 func (this *APIServer) registerAdminFunctions() {
 
+}
+
+// Cleanup
+func (this *APIServer) cleanUp() {
+	authService := services.NewAuthService(this.db)
+	err := authService.DeleteExpiredTokens()
+	if err != nil {
+		log.Fatal("There was a problem cleaning up ")
+	}
 }

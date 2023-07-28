@@ -347,3 +347,20 @@ func (this *AuthService) ValidateTwoFactor(code, requestId string, ipAddress, us
 	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
 
 }
+
+// Delete expired tokens
+func (this *AuthService) DeleteExpiredTokens() error {
+	// Deletes User Refresh tokens
+	result, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE expiry_time < NOW()")
+	count, _ := result.RowsAffected()
+	log.Println("DELETED number of rows for user expired tokens :", count)
+	// Deletes Two factor requests
+	result, err = this.db.Exec("DELETE FROM two_factor_requests WHERE expiry_time < NOW()")
+	count, _ = result.RowsAffected()
+	log.Println("DELETED number of rows for two_factor_requests tokens :", count)
+	// Delete Reset Password Requests
+	result, err = this.db.Exec("DELETE FROM reset_password_requests WHERE expiry_time < NOW()")
+	count, _ = result.RowsAffected()
+	log.Println("DELETED number of rows for reset_password_requests tokens :", count)
+	return err
+}
