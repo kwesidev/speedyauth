@@ -11,6 +11,8 @@ import (
 	"github.com/kwesidev/authserver/internal/utilities"
 )
 
+// Registered Service
+
 type UserController struct {
 	// Registered Services
 	db          *sql.DB
