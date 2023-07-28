@@ -5,19 +5,34 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
 // GetMainDatabaseConnections connects to the main Database
 func GetMainDatabaseConnection() *sql.DB {
 	// Build and Establish a database connection
-	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	sslConnectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=verify-full sslrootcert=%s",
+		os.Getenv("PG_HOST"),
+		os.Getenv("PG_PORT"),
+		os.Getenv("PG_USER"),
+		os.Getenv("PG_PASSWORD"),
+		os.Getenv("PG_DB"),
+		os.Getenv("PG_CERT"),
+	)
+	normalConnectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv("PG_HOST"),
 		os.Getenv("PG_PORT"),
 		os.Getenv("PG_USER"),
 		os.Getenv("PG_PASSWORD"),
 		os.Getenv("PG_DB"),
 	)
+	var connectionString string
+	if strings.Title(os.Getenv("PG_SSL")) == "True" {
+		connectionString = sslConnectionString
+	} else {
+		connectionString = normalConnectionString
+	}
 	var databaseConnection *sql.DB
 	databaseConnection, err := sql.Open("postgres", connectionString)
 	if err != nil {
