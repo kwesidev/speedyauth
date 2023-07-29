@@ -71,7 +71,8 @@ func (this *APIServer) registerAdminFunctions() {
 // Cleanup
 func (this *APIServer) cleanUp() {
 	authService := services.NewAuthService(this.db)
-	err := authService.DeleteExpiredTokens()
+	// Deletes expired tokens after 30 days
+	err := authService.DeleteExpiredTokens(30)
 	if err != nil {
 		log.Fatal("There was a problem cleaning up ")
 	}
