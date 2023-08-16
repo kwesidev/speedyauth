@@ -359,7 +359,7 @@ func (this *AuthService) DeleteExpiredTokens(days int) error {
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for two_factor_requests tokens :", count)
 	// Delete Reset Password Requests
-	result, err = this.db.Exec("DELETE FROM reset_password_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) = $1", days)
+	result, err = this.db.Exec("DELETE FROM reset_password_requests WHERE $1 >= (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) ", days)
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for reset_password_requests tokens :", count)
 	return err
