@@ -351,15 +351,15 @@ func (this *AuthService) ValidateTwoFactor(code, requestId string, ipAddress, us
 // Delete expired tokens
 func (this *AuthService) DeleteExpiredTokens(days int) error {
 	// Deletes User Refresh tokens
-	result, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) = $1", days)
+	result, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
 	count, _ := result.RowsAffected()
 	log.Println("DELETED number of rows for user expired tokens :", count)
 	// Deletes Two factor requests
-	result, err = this.db.Exec("DELETE FROM two_factor_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) = $1", days)
+	result, err = this.db.Exec("DELETE FROM two_factor_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for two_factor_requests tokens :", count)
 	// Delete Reset Password Requests
-	result, err = this.db.Exec("DELETE FROM reset_password_requests WHERE $1 >= (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) ", days)
+	result, err = this.db.Exec("DELETE FROM reset_password_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for reset_password_requests tokens :", count)
 	return err
