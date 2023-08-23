@@ -11,7 +11,7 @@
 				"method": "GET",
 				"header": [
 					{
-						"key": "token",
+						"key": "Authorization Bearer",
 						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
 						"type": "text"
 					}
@@ -44,7 +44,7 @@
 				"disableBodyPruning": true
 			},
 			"request": {
-				"method": "GET",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
@@ -80,9 +80,24 @@
 		{
 			"name": "Update User",
 			"request": {
-				"method": "GET",
-				"header": [],
-				"url": null
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization Bearer",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\":\"jackie\",\n    \"lastName\":\"jackson\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/update"
 			},
 			"response": []
 		},
