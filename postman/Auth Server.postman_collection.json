@@ -11,8 +11,8 @@
 				"method": "GET",
 				"header": [
 					{
-						"key": "Authorization Bearer",
-						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
 						"type": "text"
 					}
 				],
@@ -83,8 +83,8 @@
 				"method": "POST",
 				"header": [
 					{
-						"key": "Authorization Bearer",
-						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
 						"type": "text"
 					}
 				],
