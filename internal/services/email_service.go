@@ -1,10 +1,14 @@
 package services
 
 import (
+	"bytes"
 	"crypto/tls"
+	"html/template"
+	"log"
 	"os"
 	"strconv"
 
+	"github.com/kwesidev/authserver/internal/models"
 	"gopkg.in/gomail.v2"
 )
 
@@ -29,7 +33,7 @@ func NewEmailService(secure bool) *EmailService {
 }
 
 // SendEmail funnction sends email directly to an external server
-func (this *EmailService) SendEmail(to []string, subject, message string) error {
+func (this *EmailService) sendEmail(to []string, subject, message string) error {
 	portNumber, _ := strconv.Atoi(this.smtpPort)
 	d := gomail.NewDialer(this.smtpHost, portNumber, this.smtpUsername, this.smtpPassword)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: this.secure}
@@ -41,6 +45,60 @@ func (this *EmailService) SendEmail(to []string, subject, message string) error 
 	m.SetBody("text/html", message)
 	// Proceed to send the email
 	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+	return nil
+}
+
+// SendTwoFactorRequest sends two factor mail
+func (this *EmailService) SendTwoFactorRequest(randomCode string, userDetails models.User) error {
+	var twoFactorRequestTemplateBuffer bytes.Buffer
+	// Get email template from directory and assign random code to it
+	emailTemplateFile, err := template.ParseFiles("static/email_templates/TwoFactorLogin.html")
+	if err != nil {
+		log.Println("Template reading :", err)
+		return err
+	}
+	tmpl := template.Must(emailTemplateFile, err)
+	emailTemplateData := struct {
+		FullName   string
+		RandomCode string
+	}{}
+	emailTemplateData.RandomCode = randomCode
+	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
+	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
+	recipient := []string{userDetails.EmailAddress}
+	err = this.sendEmail(recipient, "Two-factor login", twoFactorRequestTemplateBuffer.String())
+	if err != nil {
+		log.Println("Sending Two Factor Request Email Error", err)
+
+		return err
+	}
+	return nil
+}
+
+// SendPasswordRequest
+// Sends a password request mail to the receiver
+func (this *EmailService) SendPasswordResetRequest(randomNumberString string, userDetails models.User) error {
+	var passwordResetTemplateBuffer bytes.Buffer
+	// Get email template from directory and assign random code to it
+	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")
+	if err != nil {
+		log.Println("Template reading ", err)
+		return err
+	}
+	tmpl := template.Must(emailTemplateFile, err)
+	emailTemplateData := struct {
+		FullName   string
+		RandomCode string
+	}{}
+	emailTemplateData.RandomCode = randomNumberString
+	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
+	tmpl.Execute(&passwordResetTemplateBuffer, emailTemplateData)
+	recipient := []string{userDetails.EmailAddress}
+	err = this.sendEmail(recipient, "Password Reset Request", passwordResetTemplateBuffer.String())
+	if err != nil {
+		log.Println("Sending Password Reset Email Error", err)
 		return err
 	}
 	return nil

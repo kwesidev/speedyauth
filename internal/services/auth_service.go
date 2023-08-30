@@ -1,10 +1,8 @@
 package services
 
 import (
-	"bytes"
 	"database/sql"
 	"errors"
-	"html/template"
 	"log"
 	"math/rand"
 	"os"
@@ -134,8 +132,7 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 	//check if the username exists and then send vertification code
 	var (
-		userId                      int
-		passwordResetTemplateBuffer bytes.Buffer
+		userId int
 	)
 	row := this.db.QueryRow("SELECT id FROM users where username = $1 OR email_address = $1 ", username)
 	err := row.Scan(&userId)
@@ -161,10 +158,11 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 		return false, err
 	}
 	// Generate some random code to be sent to the user for reseting of the password
-	rand.Seed(time.Now().UnixNano())
+	randomSource := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(randomSource)
 	randNumbers := make([]string, 6)
 	for i := range randNumbers {
-		randNumbers[i] = strconv.Itoa(rand.Intn(9))
+		randNumbers[i] = strconv.Itoa(random.Intn(9))
 	}
 	randomNumberString := strings.Join(randNumbers, "")
 	_, err = tx.Exec("INSERT INTO reset_password_requests(user_id, code, created, expiry_time) values($1, $2, NOW(), $3)", userId, randomNumberString, time.Now().Add(30*time.Minute))
@@ -173,22 +171,7 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 		log.Println(err)
 		return false, err
 	}
-	// Get email template from directory and assign random code to it
-	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")
-	if err != nil {
-		log.Println("Email Error", err)
-		return false, err
-	}
-	tmpl := template.Must(emailTemplateFile, err)
-	emailTemplateData := struct {
-		FullName   string
-		RandomCode string
-	}{}
-	emailTemplateData.RandomCode = randomNumberString
-	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
-	tmpl.Execute(&passwordResetTemplateBuffer, emailTemplateData)
-	recipient := []string{userDetails.EmailAddress}
-	err = this.emailService.SendEmail(recipient, "Password Reset Request", passwordResetTemplateBuffer.String())
+	err = this.emailService.SendPasswordResetRequest(randomNumberString, *userDetails)
 	if err != nil {
 		log.Println("Email Error", err)
 		tx.Rollback()
@@ -242,7 +225,6 @@ func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (
 }
 
 func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
-	var twoFactorRequestTemplateBuffer bytes.Buffer
 	tx, err := this.db.Begin()
 	if err != nil {
 		log.Println(err)
@@ -272,25 +254,9 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 		tx.Rollback()
 		return nil, errors.New("Error Generating Two factor request")
 	}
-	// Get email template from directory and assign random code to it
-	emailTemplateFile, err := template.ParseFiles("static/email_templates/TwoFactorLogin.html")
+	err = this.emailService.SendTwoFactorRequest(randomCode, userDetails)
 	if err != nil {
-		tx.Rollback()
-		log.Println("Email Error", err)
-		return nil, err
-	}
-	tmpl := template.Must(emailTemplateFile, err)
-	emailTemplateData := struct {
-		FullName   string
-		RandomCode string
-	}{}
-	emailTemplateData.RandomCode = randomCode
-	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
-	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
-	recipient := []string{userDetails.EmailAddress}
-	err = this.emailService.SendEmail(recipient, "Two-factor login", twoFactorRequestTemplateBuffer.String())
-	if err != nil {
-		log.Println("Email Error", err)
+		log.Println("Sending Email error", err)
 		tx.Rollback()
 		return nil, err
 	}
