@@ -47,13 +47,13 @@ func ValidateJwtAndGetClaims(tokenString string) (map[string]interface{}, error)
 }
 
 // GenerateOpaqueToken function to generate random tokens
-func GenerateOpaqueToken(length int) string {
+func GenerateOpaqueToken(ramdomCharsLengh int) string {
 	var alphaNum = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	randomLetters := make([]rune, length)
-	// Generate Sudo random
-	rand.Seed(time.Now().UnixNano())
+	randomLetters := make([]rune, ramdomCharsLengh)
+	randomSource := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(randomSource)
 	for i := range randomLetters {
-		randomLetters[i] = alphaNum[rand.Intn(len(randomLetters))]
+		randomLetters[i] = alphaNum[random.Intn(len(randomLetters))]
 	}
 	// Convert to sha1 string
 	randomString := string(randomLetters)

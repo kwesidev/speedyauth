@@ -2,7 +2,7 @@ package utilities
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 
@@ -10,7 +10,7 @@ import (
 )
 
 func GetJsonInput(input interface{}, req *http.Request) error {
-	body, err := ioutil.ReadAll(req.Body)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Println(err)
 		return err

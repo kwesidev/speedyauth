@@ -249,10 +249,11 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 		return nil, err
 	}
 	authResult := &models.AuthenticationResponse{}
-	rand.Seed(time.Now().UnixNano())
+	randomSource := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(randomSource)
 	randNumbers := make([]string, 6)
 	for i := range randNumbers {
-		randNumbers[i] = strconv.Itoa(rand.Intn(9))
+		randNumbers[i] = strconv.Itoa(random.Intn(9))
 	}
 	// Expire after 5minutes
 	expires := time.Duration(300 * time.Second)
