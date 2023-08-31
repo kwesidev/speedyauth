@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -58,4 +60,15 @@ func GenerateOpaqueToken(ramdomCharsLengh int) string {
 	// Convert to sha1 string
 	randomString := string(randomLetters)
 	return fmt.Sprintf("%x", sha1.Sum([]byte(randomString)))
+}
+
+// Generate Random Digits
+func GenerateRandomDigits(length int) string {
+	randomSource := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(randomSource)
+	randNumbers := make([]string, length)
+	for i := range randNumbers {
+		randNumbers[i] = strconv.Itoa(random.Intn(9))
+	}
+	return strings.Join(randNumbers, "")
 }
