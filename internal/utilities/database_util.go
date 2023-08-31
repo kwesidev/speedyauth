@@ -28,7 +28,7 @@ func GetMainDatabaseConnection() *sql.DB {
 		os.Getenv("PG_DB"),
 	)
 	var connectionString string
-	if strings.Title(os.Getenv("PG_SSL")) == "True" {
+	if strings.ToTitle(os.Getenv("PG_SSL")) == "True" {
 		connectionString = sslConnectionString
 	} else {
 		connectionString = normalConnectionString
