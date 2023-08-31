@@ -4,10 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
-	"math/rand"
 	"os"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/kwesidev/authserver/internal/models"
@@ -158,20 +155,14 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 		return false, err
 	}
 	// Generate some random code to be sent to the user for reseting of the password
-	randomSource := rand.NewSource(time.Now().UnixNano())
-	random := rand.New(randomSource)
-	randNumbers := make([]string, 6)
-	for i := range randNumbers {
-		randNumbers[i] = strconv.Itoa(random.Intn(9))
-	}
-	randomNumberString := strings.Join(randNumbers, "")
-	_, err = tx.Exec("INSERT INTO reset_password_requests(user_id, code, created, expiry_time) values($1, $2, NOW(), $3)", userId, randomNumberString, time.Now().Add(30*time.Minute))
+	randomCodes := utilities.GenerateRandomDigits(6)
+	_, err = tx.Exec("INSERT INTO reset_password_requests(user_id, code, created, expiry_time) values($1, $2, NOW(), $3)", userId, randomCodes, time.Now().Add(30*time.Minute))
 	if err != nil {
 		tx.Rollback()
 		log.Println(err)
 		return false, err
 	}
-	err = this.emailService.SendPasswordResetRequest(randomNumberString, *userDetails)
+	err = this.emailService.SendPasswordResetRequest(randomCodes, *userDetails)
 	if err != nil {
 		log.Println("Email Error", err)
 		tx.Rollback()
@@ -231,15 +222,9 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 		return nil, err
 	}
 	authResult := &models.AuthenticationResponse{}
-	randomSource := rand.NewSource(time.Now().UnixNano())
-	random := rand.New(randomSource)
-	randNumbers := make([]string, 6)
-	for i := range randNumbers {
-		randNumbers[i] = strconv.Itoa(random.Intn(9))
-	}
 	// Expire after 5minutes
 	expires := time.Duration(300 * time.Second)
-	randomCode := strings.Join(randNumbers, "")
+	randomCodes := utilities.GenerateRandomDigits(6)
 	requestId := utilities.GenerateOpaqueToken(60)
 	queryString :=
 		`INSERT 
@@ -248,13 +233,13 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 	        VALUES
 	        	($1, $2 ,$3 ,$4, $5, NOW(), $6)
 	    `
-	_, err = tx.Exec(queryString, userDetails.ID, requestId, ipAddress, randomCode, userAgent, time.Now().Add(expires))
+	_, err = tx.Exec(queryString, userDetails.ID, requestId, ipAddress, randomCodes, userAgent, time.Now().Add(expires))
 	if err != nil {
 		log.Println(err)
 		tx.Rollback()
 		return nil, errors.New("Error Generating Two factor request")
 	}
-	err = this.emailService.SendTwoFactorRequest(randomCode, userDetails)
+	err = this.emailService.SendTwoFactorRequest(randomCodes, userDetails)
 	if err != nil {
 		log.Println("Sending Email error", err)
 		tx.Rollback()
