@@ -98,6 +98,7 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 		return false, err
 	}
 	tx, err := this.db.Begin()
+	defer tx.Rollback()
 	queryString := `
     	INSERT INTO users
 		    (username, password, first_name,last_name, email_address, phone_number, active, two_factor_enabled)
@@ -112,7 +113,6 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 	err = row.Scan(&newUserId)
 	if err != nil {
 		log.Println(err)
-		tx.Rollback()
 		return false, err
 	}
 	queryString = `
@@ -124,11 +124,12 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 	    `
 	_, err = tx.Exec(queryString, newUserId, "USER")
 	if err != nil {
-		tx.Rollback()
 		log.Println(err)
 		return false, nil
 	}
-	tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return false, err
+	}
 	return true, nil
 }
 

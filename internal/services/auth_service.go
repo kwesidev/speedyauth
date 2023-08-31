@@ -94,6 +94,7 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	// Delete the old token and generate new access token and refresh token
 	refreshToken := utilities.GenerateOpaqueToken(45)
 	tx, err := this.db.Begin()
+	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -101,7 +102,6 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	_, err = tx.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1 AND token = $2", userId, oldRefreshToken)
 	if err != nil {
 		log.Println(err)
-		tx.Rollback()
 		return nil, err
 	}
 	queryString :=
@@ -115,10 +115,11 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	_, err = tx.Exec(queryString, userId, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry))
 	if err != nil {
 		tx.Rollback()
-		log.Println(err)
 		return nil, err
 	}
-	tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	authResult.RefreshToken = refreshToken
 	authResult.Token = jwtToken
 	authResult.Roles = roles
@@ -143,6 +144,7 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 		return false, errors.New("User is not active so password cannot be reset")
 	}
 	tx, err := this.db.Begin()
+	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
 		return false, err
@@ -158,17 +160,17 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 	randomCodes := utilities.GenerateRandomDigits(6)
 	_, err = tx.Exec("INSERT INTO reset_password_requests(user_id, code, created, expiry_time) values($1, $2, NOW(), $3)", userId, randomCodes, time.Now().Add(30*time.Minute))
 	if err != nil {
-		tx.Rollback()
 		log.Println(err)
 		return false, err
 	}
 	err = this.emailService.SendPasswordResetRequest(randomCodes, *userDetails)
 	if err != nil {
 		log.Println("Email Error", err)
-		tx.Rollback()
 		return false, err
 	}
-	tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return false, err
+	}
 	return true, nil
 }
 
@@ -178,6 +180,7 @@ func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (
 	const errorMessage string = "Failed to Update password"
 	var userId int
 	tx, err := this.db.Begin()
+	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
 		return false, err
@@ -196,27 +199,27 @@ func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (
 	_, err = tx.Exec("UPDATE users SET password = $2 WHERE id = $1", userId, passwordHash)
 	if err != nil {
 		log.Println(err)
-		tx.Rollback()
 		return false, errors.New(errorMessage)
 	}
 	_, err = tx.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1", userId)
 	if err != nil {
 		log.Println(err)
-		tx.Rollback()
 		return false, errors.New(errorMessage)
 	}
 	_, err = tx.Exec("DELETE FROM reset_password_requests WHERE user_id = $1", userId)
 	if err != nil {
 		log.Println(err)
-		tx.Rollback()
 		return false, errors.New(errorMessage)
 	}
-	tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return false, err
+	}
 	return true, nil
 }
 
 func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
 	tx, err := this.db.Begin()
+	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -236,16 +239,16 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 	_, err = tx.Exec(queryString, userDetails.ID, requestId, ipAddress, randomCodes, userAgent, time.Now().Add(expires))
 	if err != nil {
 		log.Println(err)
-		tx.Rollback()
 		return nil, errors.New("Error Generating Two factor request")
 	}
 	err = this.emailService.SendTwoFactorRequest(randomCodes, userDetails)
 	if err != nil {
 		log.Println("Sending Email error", err)
-		tx.Rollback()
 		return nil, err
 	}
-	tx.Commit()
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
 	authResult.TwoFactorEnabled = true
 	authResult.Token = requestId
 	return authResult, nil
