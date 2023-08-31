@@ -41,16 +41,16 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	row.Scan(&userId, &passwordHash)
 	// Check if username is valid
 	if userId == 0 {
-		return nil, errors.New("Invalid Username")
+		return nil, errors.New(ERROR_INVALID_USERNAME)
 	}
 	userDetails := this.userService.Get(userId)
 	if userDetails.Active == false {
-		return nil, errors.New("Your account is not active , contact support ")
+		return nil, errors.New(ERROR_ACCOUNT_NOT_ACTIVE)
 	}
 	// Validates password
 	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))
 	if err != nil {
-		return nil, errors.New("Invalid Password")
+		return nil, errors.New(ERROR_INVALID_PASSWORD)
 	}
 	// Check if two authentication is required
 	if userDetails.TwoFactorEnabled {
@@ -61,7 +61,7 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	userDetails.Roles = roles
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Failed to get roles")
+		return nil, err
 	}
 	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
 }
@@ -76,12 +76,12 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Refresh Token is not there")
-		return nil, errors.New("Refresh Token is Invalid")
+		return nil, errors.New(ERROR_TOKEN_INVALID)
 	}
 	// Check if account is active before refreshing token
 	userDetails := this.userService.Get(userId)
 	if userDetails.Active == false {
-		return nil, errors.New("Your account is not active , contact support ")
+		return nil, errors.New(ERROR_ACCOUNT_NOT_ACTIVE)
 	}
 	roles, _ := this.userService.GetRoles(userId)
 	tokenExpiry := time.Duration(this.tokenTime)
@@ -136,12 +136,12 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 	err := row.Scan(&userId)
 	if err != nil {
 		log.Println(err)
-		return false, errors.New("Username or Email Address does not exists")
+		return false, errors.New(ERROR_INVALID_USERNAME)
 	}
 	userDetails := this.userService.Get(userId)
 	if userDetails.Active == false {
 		log.Println(err)
-		return false, errors.New("User is not active so password cannot be reset")
+		return false, errors.New(ERROR_ACCOUNT_NOT_ACTIVE)
 	}
 	tx, err := this.db.Begin()
 	defer tx.Rollback()
@@ -166,7 +166,7 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 	err = this.emailService.SendPasswordResetRequest(randomCodes, *userDetails)
 	if err != nil {
 		log.Println("Email Error", err)
-		return false, err
+		return false, errors.New(ERROR_EMAIL_SENDING)
 	}
 	if err = tx.Commit(); err != nil {
 		return false, err
@@ -176,8 +176,6 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 
 // VerifyAndSetNewPassword functions to verify and reset password
 func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
-	// Check and see if code exists
-	const errorMessage string = "Failed to Update password"
 	var userId int
 	tx, err := this.db.Begin()
 	defer tx.Rollback()
@@ -189,27 +187,27 @@ func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Invalid Code")
-		return false, errors.New("Code is invalid")
+		return false, errors.New(ERROR_INVALID_CODE)
 	}
 	// update password and delete all refresh tokens
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
-		return false, errors.New(errorMessage)
+		return false, errors.New(ERROR_PASSWORD_UPDATE)
 	}
 	_, err = tx.Exec("UPDATE users SET password = $2 WHERE id = $1", userId, passwordHash)
 	if err != nil {
 		log.Println(err)
-		return false, errors.New(errorMessage)
+		return false, errors.New(ERROR_PASSWORD_UPDATE)
 	}
 	_, err = tx.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1", userId)
 	if err != nil {
 		log.Println(err)
-		return false, errors.New(errorMessage)
+		return false, errors.New(ERROR_PASSWORD_UPDATE)
 	}
 	_, err = tx.Exec("DELETE FROM reset_password_requests WHERE user_id = $1", userId)
 	if err != nil {
 		log.Println(err)
-		return false, errors.New(errorMessage)
+		return false, errors.New(ERROR_PASSWORD_UPDATE)
 	}
 	if err = tx.Commit(); err != nil {
 		return false, err
@@ -239,12 +237,12 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 	_, err = tx.Exec(queryString, userDetails.ID, requestId, ipAddress, randomCodes, userAgent, time.Now().Add(expires))
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error Generating Two factor request")
+		return nil, errors.New(ERRROR_TWO_FACTOR_REQUEST)
 	}
 	err = this.emailService.SendTwoFactorRequest(randomCodes, userDetails)
 	if err != nil {
 		log.Println("Sending Email error", err)
-		return nil, err
+		return nil, errors.New(ERROR_EMAIL_SENDING)
 	}
 	if err = tx.Commit(); err != nil {
 		return nil, err
@@ -261,7 +259,7 @@ func (this *AuthService) generateTokenDetails(userDetails models.User, ipAddress
 	jwtToken, err := utilities.GenerateJwtToken(userDetails.ID, userDetails.Roles, tokenExpiry)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error Generating Access Token")
+		return nil, errors.New(ERROR_ACCESS_TOKEN_GENERATION)
 	}
 	refreshToken := utilities.GenerateOpaqueToken(45)
 	queryString :=
@@ -275,7 +273,7 @@ func (this *AuthService) generateTokenDetails(userDetails models.User, ipAddress
 	_, err = this.db.Exec(queryString, userDetails.ID, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry))
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("Error Generating Refresh Token")
+		return nil, errors.New(ERROR_TOKEN_GENERATION)
 	}
 	authResult.RefreshToken = refreshToken
 	authResult.Token = jwtToken
@@ -292,11 +290,11 @@ func (this *AuthService) ValidateTwoFactor(code, requestId string, ipAddress, us
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Invalid Code")
-		return nil, errors.New("Failed to validate")
+		return nil, errors.New(ERRROR_TWO_FACTOR_CODE)
 	}
 	if _, err := this.db.Exec("DELETE FROM two_factor_requests WHERE code = $1 AND request_id = $2", code, requestId); err != nil {
 		log.Println(err)
-		return nil, errors.New("Failed to validate")
+		return nil, errors.New(ERRROR_TWO_FACTOR_CODE)
 	}
 	userDetails := this.userService.Get(userId)
 	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
