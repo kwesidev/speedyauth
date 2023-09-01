@@ -68,10 +68,8 @@ func (this *EmailService) SendTwoFactorRequest(randomCodes string, userDetails m
 	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
 	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
 	recipient := []string{userDetails.EmailAddress}
-	err = this.sendEmail(recipient, "Two-factor login", twoFactorRequestTemplateBuffer.String())
-	if err != nil {
+	if err = this.sendEmail(recipient, "Two-factor login", twoFactorRequestTemplateBuffer.String()); err != nil {
 		log.Println("Sending Two Factor Request Email Error", err)
-
 		return err
 	}
 	return nil
@@ -96,8 +94,7 @@ func (this *EmailService) SendPasswordResetRequest(randomCodes string, userDetai
 	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
 	tmpl.Execute(&passwordResetTemplateBuffer, emailTemplateData)
 	recipient := []string{userDetails.EmailAddress}
-	err = this.sendEmail(recipient, "Password Reset Request", passwordResetTemplateBuffer.String())
-	if err != nil {
+	if err = this.sendEmail(recipient, "Password Reset Request", passwordResetTemplateBuffer.String()); err != nil {
 		log.Println("Sending Password Reset Email Error", err)
 		return err
 	}

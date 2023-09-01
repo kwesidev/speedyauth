@@ -110,8 +110,7 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 		userRegistrationRequest.FirstName, userRegistrationRequest.LastName,
 		userRegistrationRequest.EmailAddress, userRegistrationRequest.CellNumber)
 	var newUserId int
-	err = row.Scan(&newUserId)
-	if err != nil {
+	if err = row.Scan(&newUserId); err != nil {
 		log.Println(err)
 		return false, err
 	}
@@ -122,8 +121,7 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 	    VALUES
 		    ($1, (SELECT id FROM roles WHERE type = $2))
 	    `
-	_, err = tx.Exec(queryString, newUserId, "USER")
-	if err != nil {
+	if _, err = tx.Exec(queryString, newUserId, "USER"); err != nil {
 		log.Println(err)
 		return false, nil
 	}
@@ -195,8 +193,7 @@ func (this *UserService) Update(userId int, userUpdateRequest models.UserUpdateR
 	args = append(args, userId)
 
 	// Execute the query with the dynamic arguments
-	_, err := this.db.Exec(query, args...)
-	if err != nil {
+	if _, err := this.db.Exec(query, args...); err != nil {
 		log.Println("Updating user failed ", err)
 		return err
 	}
@@ -206,8 +203,7 @@ func (this *UserService) Update(userId int, userUpdateRequest models.UserUpdateR
 
 // DeleteToken function to delete refresh Token
 func (this *UserService) DeleteToken(userId int, refreshToken string) (bool, error) {
-	_, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE token = $1 AND user_id = $2", refreshToken, userId)
-	if err != nil {
+	if _, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE token = $1 AND user_id = $2", refreshToken, userId); err != nil {
 		log.Println(err)
 		return false, err
 	}
