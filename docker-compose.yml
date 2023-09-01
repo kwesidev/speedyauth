@@ -26,6 +26,8 @@ services:
       - SMTP_PORT=$SMTP_PORT
       - SERVER_PORT=$SERVER_PORT
       - SERVER_ADDRESS=$SERVER_ADDRESS
+      - PG_SSL=False
+      - TOKEN_EXPIRY_TIME=15m
 
   mailhog:
     image: mailhog/mailhog:latest
