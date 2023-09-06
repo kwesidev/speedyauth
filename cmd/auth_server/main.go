@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/kwesidev/authserver/internal/apiserver"
 	"github.com/kwesidev/authserver/internal/utilities"
 )
@@ -21,6 +22,30 @@ func initialize() {
 		log.Println("Not loading Config from .env")
 	}
 	databaseConnection = utilities.GetMainDatabaseConnection()
+	// // Apply DB migrations
+	// driver, err := postgres.WithInstance(databaseConnection, &postgres.Config{})
+	// m, err := migrate.NewWithDatabaseInstance(
+	// 	"file://db/migrations",
+	// 	"postgres", driver)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// if err := m.Up(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	asciiArt := `
+
+	█████╗ ██╗   ██╗████████╗██╗  ██╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗     
+	██╔══██╗██║   ██║╚══██╔══╝██║  ██║    ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗    
+	███████║██║   ██║   ██║   ███████║    ███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝    
+	██╔══██║██║   ██║   ██║   ██╔══██║    ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗    
+	██║  ██║╚██████╔╝   ██║   ██║  ██║    ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║    
+	╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝    ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝    
+																							   
+	
+	`
+	log.Println(asciiArt)
 }
 func main() {
 	initialize()
