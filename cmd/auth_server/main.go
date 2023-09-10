@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -21,7 +22,24 @@ func initialize() {
 	if err != nil {
 		log.Println("Not loading Config from .env")
 	}
-	databaseConnection = utilities.GetMainDatabaseConnection()
+
+	databaseConfig := utilities.DatabaseConfig{
+		Host:     os.Getenv("PG_HOST"),
+		Userame:  os.Getenv("PG_USER"),
+		Password: os.Getenv("PG_PASSWORD"),
+		Port:     os.Getenv("PG_PORT"),
+		Database: os.Getenv("PG_DB"),
+	}
+	if strings.ToTitle(os.Getenv("PG_SSL")) == "True" {
+		databaseConfig.SSL = true
+		databaseConfig.Certificate = os.Getenv("PG_CERT")
+	} else {
+		databaseConfig.SSL = false
+	}
+	databaseConnection, err = utilities.GetMainDatabaseConnection(databaseConfig)
+	if err != nil {
+		log.Fatal("Failed to Connect to the  Database", err)
+	}
 	// // Apply DB migrations
 	// driver, err := postgres.WithInstance(databaseConnection, &postgres.Config{})
 	// m, err := migrate.NewWithDatabaseInstance(
