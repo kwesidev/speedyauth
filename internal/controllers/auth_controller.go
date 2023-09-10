@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"net/http"
 
@@ -48,10 +49,10 @@ func (this *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	authResult, err := this.authService.Login(authRequest.Username, authRequest.Password, "", "")
 	if err != nil {
-		if err.Error() == services.ERROR_INVALID_PASSWORD || err.Error() == services.ERROR_ACCOUNT_NOT_ACTIVE || err.Error() == services.ERROR_INVALID_USERNAME {
+		if errors.Is(err, services.ErrorInvalidUsername) || errors.Is(err, services.ErrorInvalidPassword) || errors.Is(err, services.ErrorAccountNotActive) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		} else {
-			utilities.JSONError(w, services.ERROR_SERVER_ERROR, http.StatusInternalServerError)
+			utilities.JSONError(w, services.ErrorServer.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -68,10 +69,10 @@ func (this *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request)
 	}
 	refreshResult, err := this.authService.GenerateRefreshToken(tokenRefreshRequest.RefreshToken, r.RemoteAddr, r.UserAgent())
 	if err != nil {
-		if err.Error() == services.ERROR_TOKEN_INVALID {
-			utilities.JSONError(w, services.ERROR_TOKEN_INVALID, http.StatusUnauthorized)
+		if errors.Is(err, services.ErrorInvalidToken) {
+			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		} else {
-			utilities.JSONError(w, services.ERROR_SERVER_ERROR, http.StatusUnauthorized)
+			utilities.JSONError(w, services.ErrorServer.Error(), http.StatusUnauthorized)
 		}
 		return
 	}
@@ -119,7 +120,7 @@ func (this *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r *ht
 	}{}
 	success, err := this.authService.VerifyAndSetNewPassword(verifyAndChangePasswordRequest.Code, verifyAndChangePasswordRequest.Password)
 	if err != nil {
-		utilities.JSONError(w, services.ERROR_PASSWORD_UPDATE, http.StatusBadRequest)
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	response.Success = success
@@ -146,7 +147,7 @@ func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	}{}
 	regResult, err := this.userService.Register(userRegisterationRequest)
 	if err != nil {
-		utilities.JSONError(w, services.ERROR_USER_REGISTRATION_FAILED, http.StatusBadRequest)
+		utilities.JSONError(w, services.ErrorRegistration.Error(), http.StatusBadRequest)
 		return
 	}
 	response.Success = regResult

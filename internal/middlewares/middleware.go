@@ -45,6 +45,18 @@ func Method(method string, handler func(w http.ResponseWriter, r *http.Request))
 	})
 }
 
+// // RateLimitter limits the number of request to 10requests and 30 more requests per seconds
+// func RateLimiter(handler func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+// 	limiter := rate.NewLimiter(30, 10)
+// 	return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
+// 		if !limiter.Allow() {
+// 			utilities.JSONError(w, "Request Exceeded try again later", http.StatusTooManyRequests)
+// 			return
+// 		}
+// 		handler(w, request)
+// 	})
+// }
+
 // Log all request made
 func LogRequest(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
