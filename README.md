@@ -1,5 +1,14 @@
+
 # Auth Server 
-This is designed to handle user authentication.
+![example workflow](https://github.com/kwesidev/authserver/actions/workflows/go.yml/badge.svg)
+
+A standalone authentication server that streamlines the user authentication process.
+
+## Features
+- Issuing Access Tokens and Refresh Tokens
+- Password Recovery
+- User Registration
+- Two factor Authentication
 
 ## Dependencies
 - Go >= 1.19 
