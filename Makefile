@@ -6,6 +6,9 @@ run:
 buildserver:
 	go build ./cmd/auth_server
 
+test:
+	go test ./...
+
 dockerbuild:
 	docker build -t authserver-app:latest .
 
