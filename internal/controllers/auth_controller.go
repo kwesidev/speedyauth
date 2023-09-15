@@ -33,7 +33,7 @@ func NewAuthController(db *sql.DB) *AuthController {
 }
 
 // Login Handler To Authenticate user
-func (this *AuthController) Login(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	authRequest := models.AuthenticationRequest{}
 	err := utilities.GetJsonInput(&authRequest, r)
 	if err != nil {
@@ -41,13 +41,13 @@ func (this *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//Validates the requests
-	err = this.validate.Struct(authRequest)
+	err = authCtrl.validate.Struct(authRequest)
 	if err != nil {
 		log.Println(err)
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	authResult, err := this.authService.Login(authRequest.Username, authRequest.Password, "", "")
+	authResult, err := authCtrl.authService.Login(authRequest.Username, authRequest.Password, "", "")
 	if err != nil {
 		if errors.Is(err, services.ErrorInvalidUsername) || errors.Is(err, services.ErrorInvalidPassword) || errors.Is(err, services.ErrorAccountNotActive) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
@@ -60,14 +60,14 @@ func (this *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // Function To Refresh Token
-func (this *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	tokenRefreshRequest := models.TokenRefreshRequest{}
 	err := utilities.GetJsonInput(&tokenRefreshRequest, r)
 	if err != nil {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	refreshResult, err := this.authService.GenerateRefreshToken(tokenRefreshRequest.RefreshToken, r.RemoteAddr, r.UserAgent())
+	refreshResult, err := authCtrl.authService.GenerateRefreshToken(tokenRefreshRequest.RefreshToken, r.RemoteAddr, r.UserAgent())
 	if err != nil {
 		if errors.Is(err, services.ErrorInvalidToken) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
@@ -80,7 +80,7 @@ func (this *AuthController) RefreshToken(w http.ResponseWriter, r *http.Request)
 }
 
 // Reset Password Request
-func (this *AuthController) PasswordResetRequest(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) PasswordResetRequest(w http.ResponseWriter, r *http.Request) {
 	passwordResetRequest := models.PasswordResetRequest{}
 	err := utilities.GetJsonInput(&passwordResetRequest, r)
 	if err != nil {
@@ -90,7 +90,7 @@ func (this *AuthController) PasswordResetRequest(w http.ResponseWriter, r *http.
 	response := struct {
 		Success bool `json:"success"`
 	}{}
-	success, err := this.authService.ResetPasswordRequest(passwordResetRequest.Username)
+	success, err := authCtrl.authService.ResetPasswordRequest(passwordResetRequest.Username)
 	if err != nil {
 		utilities.JSONError(w, "Failed to Send Reset password Request", http.StatusBadRequest)
 		return
@@ -100,7 +100,7 @@ func (this *AuthController) PasswordResetRequest(w http.ResponseWriter, r *http.
 }
 
 // Verify and update the password
-func (this *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r *http.Request) {
 	verifyAndChangePasswordRequest := models.VerifyChangePasswordRequest{}
 	err := utilities.GetJsonInput(&verifyAndChangePasswordRequest, r)
 	if err != nil {
@@ -109,7 +109,7 @@ func (this *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r *ht
 	}
 
 	// Validates requests
-	err = this.validate.Struct(verifyAndChangePasswordRequest)
+	err = authCtrl.validate.Struct(verifyAndChangePasswordRequest)
 	if err != nil {
 		log.Println(err)
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
@@ -118,7 +118,7 @@ func (this *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r *ht
 	response := struct {
 		Success bool `json:"success"`
 	}{}
-	success, err := this.authService.VerifyAndSetNewPassword(verifyAndChangePasswordRequest.Code, verifyAndChangePasswordRequest.Password)
+	success, err := authCtrl.authService.VerifyAndSetNewPassword(verifyAndChangePasswordRequest.Code, verifyAndChangePasswordRequest.Password)
 	if err != nil {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -128,7 +128,7 @@ func (this *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r *ht
 }
 
 // Function register User
-func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	userRegisterationRequest := models.UserRegistrationRequest{}
 	err := utilities.GetJsonInput(&userRegisterationRequest, r)
 	if err != nil {
@@ -136,7 +136,7 @@ func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Validates requests
-	err = this.validate.Struct(userRegisterationRequest)
+	err = authCtrl.validate.Struct(userRegisterationRequest)
 	if err != nil {
 		log.Println(err)
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
@@ -145,7 +145,7 @@ func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	response := struct {
 		Success bool `json:"success"`
 	}{}
-	regResult, err := this.userService.Register(userRegisterationRequest)
+	regResult, err := authCtrl.userService.Register(userRegisterationRequest)
 	if err != nil {
 		utilities.JSONError(w, services.ErrorRegistration.Error(), http.StatusBadRequest)
 		return
@@ -154,8 +154,8 @@ func (this *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	utilities.JSONResponse(w, response)
 }
 
-// Validates Two Factor this function is only called when two factor is required
-func (this *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http.Request) {
+// Validates Two Factor authCtrl function is only called when two factor is required
+func (authCtrl *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http.Request) {
 	twoFactorRequest := models.VerifyTwoFactorRequest{}
 	err := utilities.GetJsonInput(&twoFactorRequest, r)
 	if err != nil {
@@ -163,13 +163,13 @@ func (this *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http.Req
 		return
 	}
 	// Validates requests
-	err = this.validate.Struct(twoFactorRequest)
+	err = authCtrl.validate.Struct(twoFactorRequest)
 	if err != nil {
 		log.Println(err)
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	authResult, err := this.authService.ValidateTwoFactor(twoFactorRequest.Code, twoFactorRequest.RequestId, "", "")
+	authResult, err := authCtrl.authService.ValidateTwoFactor(twoFactorRequest.Code, twoFactorRequest.RequestId, "", "")
 	if err != nil {
 		utilities.JSONError(w, "Failed to Complete the authentication", http.StatusBadRequest)
 		return
@@ -179,6 +179,6 @@ func (this *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http.Req
 }
 
 // Health
-func (this *AuthController) Health(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) Health(w http.ResponseWriter, r *http.Request) {
 	utilities.JSONResponse(w, "OKAY")
 }

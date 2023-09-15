@@ -30,19 +30,19 @@ func NewAuthService(db *sql.DB) *AuthService {
 }
 
 // Login function to authenticate user
-func (this *AuthService) Login(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *AuthService) Login(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var (
 		userId       int
 		passwordHash string
 		err          error
 	)
-	row := this.db.QueryRow("SELECT id, password FROM users WHERE username = $1  LIMIT 1 ", username)
+	row := authSrv.db.QueryRow("SELECT id, password FROM users WHERE username = $1  LIMIT 1 ", username)
 	row.Scan(&userId, &passwordHash)
 	// Check if username is valid
 	if userId == 0 {
 		return nil, ErrorInvalidUsername
 	}
-	userDetails := this.userService.Get(userId)
+	userDetails := authSrv.userService.Get(userId)
 	if userDetails.Active == false {
 		return nil, ErrorAccountNotActive
 	}
@@ -52,37 +52,37 @@ func (this *AuthService) Login(username, password, ipAddress, userAgent string) 
 	}
 	// Check if two authentication is required
 	if userDetails.TwoFactorEnabled {
-		return this.twoFactorRequest(*userDetails, ipAddress, userAgent)
+		return authSrv.twoFactorRequest(*userDetails, ipAddress, userAgent)
 	}
 	// Get user roles
-	roles, err := this.userService.GetRoles(userId)
+	roles, err := authSrv.userService.GetRoles(userId)
 	userDetails.Roles = roles
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
+	return authSrv.generateTokenDetails(*userDetails, ipAddress, userAgent)
 }
 
 // Refresh Token generates a new refresh token that will be used to get a new access token and a refresh token
-func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var (
 		userId int
 	)
 	authResult := &models.AuthenticationResponse{}
-	row := this.db.QueryRow("SELECT user_id FROM user_refresh_tokens WHERE token = $1 AND expiry_time > NOW() ", oldRefreshToken)
+	row := authSrv.db.QueryRow("SELECT user_id FROM user_refresh_tokens WHERE token = $1 AND expiry_time > NOW() ", oldRefreshToken)
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Refresh Token is not there")
 		return nil, ErrorInvalidToken
 	}
 	// Check if account is active before refreshing token
-	userDetails := this.userService.Get(userId)
+	userDetails := authSrv.userService.Get(userId)
 	if userDetails.Active == false {
 		return nil, ErrorAccountNotActive
 	}
-	roles, _ := this.userService.GetRoles(userId)
-	tokenExpiry := time.Duration(this.tokenTime)
+	roles, _ := authSrv.userService.GetRoles(userId)
+	tokenExpiry := time.Duration(authSrv.tokenTime)
 
 	jwtToken, err := utilities.GenerateJwtToken(userId, roles, time.Duration(tokenExpiry))
 	if err != nil {
@@ -91,7 +91,7 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	}
 	// Delete the old token and generate new access token and refresh token
 	refreshToken := utilities.GenerateOpaqueToken(45)
-	tx, err := this.db.Begin()
+	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
@@ -122,21 +122,21 @@ func (this *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAg
 	return authResult, nil
 }
 
-func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
+func (authSrv *AuthService) ResetPasswordRequest(username string) (bool, error) {
 	//check if the username exists and then send vertification code
 	var (
 		userId int
 	)
-	row := this.db.QueryRow("SELECT id FROM users where username = $1 OR email_address = $1 ", username)
+	row := authSrv.db.QueryRow("SELECT id FROM users where username = $1 OR email_address = $1 ", username)
 	if err := row.Scan(&userId); err != nil {
 		log.Println(err)
 		return false, ErrorInvalidUsername
 	}
-	userDetails := this.userService.Get(userId)
+	userDetails := authSrv.userService.Get(userId)
 	if userDetails.Active == false {
 		return false, ErrorAccountNotActive
 	}
-	tx, err := this.db.Begin()
+	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
@@ -153,7 +153,7 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 		log.Println(err)
 		return false, err
 	}
-	if err = this.emailService.SendPasswordResetRequest(randomCodes, *userDetails); err != nil {
+	if err = authSrv.emailService.SendPasswordResetRequest(randomCodes, *userDetails); err != nil {
 		log.Println("Email Error", err)
 		return false, ErrSendingMail
 	}
@@ -164,9 +164,9 @@ func (this *AuthService) ResetPasswordRequest(username string) (bool, error) {
 }
 
 // VerifyAndSetNewPassword functions to verify and reset password
-func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
+func (authSrv *AuthService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
 	var userId int
-	tx, err := this.db.Begin()
+	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
@@ -202,8 +202,8 @@ func (this *AuthService) VerifyAndSetNewPassword(code string, password string) (
 	return true, nil
 }
 
-func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
-	tx, err := this.db.Begin()
+func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
+	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
 	if err != nil {
 		log.Println(err)
@@ -225,7 +225,7 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 		log.Println(err)
 		return nil, ErrorTwoFactorRequest
 	}
-	if err = this.emailService.SendTwoFactorRequest(randomCodes, userDetails); err != nil {
+	if err = authSrv.emailService.SendTwoFactorRequest(randomCodes, userDetails); err != nil {
 		log.Println("Sending Email error", err)
 		return nil, ErrSendingMail
 	}
@@ -237,9 +237,9 @@ func (this *AuthService) twoFactorRequest(userDetails models.User, ipAddress str
 	return authResult, nil
 }
 
-func (this *AuthService) generateTokenDetails(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *AuthService) generateTokenDetails(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
 	authResult := &models.AuthenticationResponse{}
-	tokenExpiry := time.Duration(this.tokenTime)
+	tokenExpiry := time.Duration(authSrv.tokenTime)
 	// Generates JWT Token and Refresh token that expires after xminutes
 	jwtToken, err := utilities.GenerateJwtToken(userDetails.ID, userDetails.Roles, tokenExpiry)
 	if err != nil {
@@ -255,7 +255,7 @@ func (this *AuthService) generateTokenDetails(userDetails models.User, ipAddress
 	        	($1, $2 ,NOW() ,$3 ,$4, $5)
 	    `
 	// Generate a jwt and refresh token
-	if _, err = this.db.Exec(queryString, userDetails.ID, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry)); err != nil {
+	if _, err = authSrv.db.Exec(queryString, userDetails.ID, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry)); err != nil {
 		log.Println(err)
 		return nil, ErrorTokenGeneration
 	}
@@ -268,35 +268,35 @@ func (this *AuthService) generateTokenDetails(userDetails models.User, ipAddress
 }
 
 // Validate the two factor authentication request and complete the authentication request
-func (this *AuthService) ValidateTwoFactor(code, requestId string, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *AuthService) ValidateTwoFactor(code, requestId string, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var userId int
-	row := this.db.QueryRow("SELECT user_id FROM two_factor_requests WHERE code = $1 AND request_id = $2 AND expiry_time > NOW() ", code, requestId)
+	row := authSrv.db.QueryRow("SELECT user_id FROM two_factor_requests WHERE code = $1 AND request_id = $2 AND expiry_time > NOW() ", code, requestId)
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Invalid Code")
 		return nil, ErrorTwoFactorCode
 	}
-	if _, err := this.db.Exec("DELETE FROM two_factor_requests WHERE code = $1 AND request_id = $2", code, requestId); err != nil {
+	if _, err := authSrv.db.Exec("DELETE FROM two_factor_requests WHERE code = $1 AND request_id = $2", code, requestId); err != nil {
 		log.Println(err)
 		return nil, ErrorTwoFactorCode
 	}
-	userDetails := this.userService.Get(userId)
-	return this.generateTokenDetails(*userDetails, ipAddress, userAgent)
+	userDetails := authSrv.userService.Get(userId)
+	return authSrv.generateTokenDetails(*userDetails, ipAddress, userAgent)
 
 }
 
 // Delete expired tokens
-func (this *AuthService) DeleteExpiredTokens(days int) error {
+func (authSrv *AuthService) DeleteExpiredTokens(days int) error {
 	// Deletes User Refresh tokens
-	result, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
+	result, err := authSrv.db.Exec("DELETE FROM user_refresh_tokens WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
 	count, _ := result.RowsAffected()
 	log.Println("DELETED number of rows for user expired tokens :", count)
 	// Deletes Two factor requests
-	result, err = this.db.Exec("DELETE FROM two_factor_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
+	result, err = authSrv.db.Exec("DELETE FROM two_factor_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for two_factor_requests tokens :", count)
 	// Delete Reset Password Requests
-	result, err = this.db.Exec("DELETE FROM reset_password_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
+	result, err = authSrv.db.Exec("DELETE FROM reset_password_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for reset_password_requests tokens :", count)
 	return err

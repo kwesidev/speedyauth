@@ -21,7 +21,7 @@ func NewUserService(db *sql.DB) *UserService {
 }
 
 // List a bunch of users
-func (this *UserService) List(offset int, limit int) ([]models.User, error) {
+func (usrSrv *UserService) List(offset int, limit int) ([]models.User, error) {
 	users := []models.User{}
 	// Get the list of users
 	queryString :=
@@ -40,7 +40,7 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 		OFFSET $1
 		LIMIT $2     
         `
-	rows, err := this.db.Query(queryString, offset, limit)
+	rows, err := usrSrv.db.Query(queryString, offset, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 		rows.Scan(&user.ID, &user.UUID, &user.Username, &user.FirstName,
 			&user.LastName, &user.CellNumber,
 			&user.EmailAddress, &user.Active, &user.TwoFactorEnabled)
-		roles, _ := this.GetRoles(user.ID)
+		roles, _ := usrSrv.GetRoles(user.ID)
 		user.Roles = roles
 		users = append(users, user)
 	}
@@ -58,7 +58,7 @@ func (this *UserService) List(offset int, limit int) ([]models.User, error) {
 }
 
 // Get user details based on ID
-func (this *UserService) Get(userId int) *models.User {
+func (usrSrv *UserService) Get(userId int) *models.User {
 	userDetails := &models.User{}
 	queryString :=
 		`SELECT 
@@ -77,11 +77,11 @@ func (this *UserService) Get(userId int) *models.User {
 			users.id = $1      
 		LIMIT 1
         `
-	row := this.db.QueryRow(queryString, userId)
+	row := usrSrv.db.QueryRow(queryString, userId)
 	// Inject the data into the struct
 	err := row.Scan(&userDetails.ID, &userDetails.UUID, &userDetails.Username, &userDetails.FirstName,
 		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active, &userDetails.TwoFactorEnabled)
-	roles, _ := this.GetRoles(userDetails.ID)
+	roles, _ := usrSrv.GetRoles(userDetails.ID)
 	userDetails.Roles = roles
 	if err != nil {
 		log.Println(err)
@@ -91,13 +91,13 @@ func (this *UserService) Get(userId int) *models.User {
 }
 
 // Register a new user
-func (this *UserService) Register(userRegistrationRequest models.UserRegistrationRequest) (bool, error) {
+func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrationRequest) (bool, error) {
 	// Salt password
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(userRegistrationRequest.Password), 10)
 	if err != nil {
 		return false, err
 	}
-	tx, err := this.db.Begin()
+	tx, err := usrSrv.db.Begin()
 	defer tx.Rollback()
 	queryString := `
     	INSERT INTO users
@@ -132,7 +132,7 @@ func (this *UserService) Register(userRegistrationRequest models.UserRegistratio
 }
 
 // GetRoles gets a list of user roles
-func (this *UserService) GetRoles(userId int) ([]string, error) {
+func (usrSrv *UserService) GetRoles(userId int) ([]string, error) {
 	roles := []string{}
 	// Get user roles
 	queryString := `
@@ -145,7 +145,7 @@ func (this *UserService) GetRoles(userId int) ([]string, error) {
 		WHERE 
 			user_roles.user_id = $1
 	    `
-	rows, err := this.db.Query(queryString, userId)
+	rows, err := usrSrv.db.Query(queryString, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (this *UserService) GetRoles(userId int) ([]string, error) {
 }
 
 // Update User
-func (this *UserService) Update(userId int, userUpdateRequest models.UserUpdateRequest) error {
+func (usrSrv *UserService) Update(userId int, userUpdateRequest models.UserUpdateRequest) error {
 	query := "UPDATE users SET "
 	var args []any
 	argCount := 1
@@ -193,7 +193,7 @@ func (this *UserService) Update(userId int, userUpdateRequest models.UserUpdateR
 	args = append(args, userId)
 
 	// Execute the query with the dynamic arguments
-	if _, err := this.db.Exec(query, args...); err != nil {
+	if _, err := usrSrv.db.Exec(query, args...); err != nil {
 		log.Println("Updating user failed ", err)
 		return err
 	}
@@ -202,8 +202,8 @@ func (this *UserService) Update(userId int, userUpdateRequest models.UserUpdateR
 }
 
 // DeleteToken function to delete refresh Token
-func (this *UserService) DeleteToken(userId int, refreshToken string) (bool, error) {
-	if _, err := this.db.Exec("DELETE FROM user_refresh_tokens WHERE token = $1 AND user_id = $2", refreshToken, userId); err != nil {
+func (usrSrv *UserService) DeleteToken(userId int, refreshToken string) (bool, error) {
+	if _, err := usrSrv.db.Exec("DELETE FROM user_refresh_tokens WHERE token = $1 AND user_id = $2", refreshToken, userId); err != nil {
 		log.Println(err)
 		return false, err
 	}

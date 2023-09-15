@@ -5,7 +5,7 @@
 -- Dumped from database version 12.13 (Ubuntu 12.13-1.pgdg20.04+1)
 -- Dumped by pg_dump version 15.1 (Ubuntu 15.1-1.pgdg20.04+1)
 
--- Started on 2023-09-15 08:35:49 SAST
+-- Started on 2023-09-15 08:58:22 SAST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -29,7 +29,7 @@ SET row_security = off;
 ALTER SCHEMA public OWNER TO postgres;
 
 --
--- TOC entry 2 (class 3079 OID 58366)
+-- TOC entry 2 (class 3079 OID 107598)
 -- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
 --
 
@@ -37,7 +37,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- TOC entry 3059 (class 0 OID 0)
+-- TOC entry 3061 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
 --
@@ -50,7 +50,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- TOC entry 212 (class 1259 OID 41964)
+-- TOC entry 215 (class 1259 OID 115831)
 -- Name: reset_password_requests; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -58,15 +58,15 @@ CREATE TABLE public.reset_password_requests (
     id bigint NOT NULL,
     user_id integer NOT NULL,
     code character varying NOT NULL,
-    expiry_time timestamp without time zone NOT NULL,
-    created timestamp without time zone NOT NULL
+    created timestamp without time zone NOT NULL,
+    expiry_time timestamp without time zone NOT NULL
 );
 
 
 ALTER TABLE public.reset_password_requests OWNER TO postgres;
 
 --
--- TOC entry 211 (class 1259 OID 41962)
+-- TOC entry 214 (class 1259 OID 115829)
 -- Name: reset_password_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -81,8 +81,8 @@ CREATE SEQUENCE public.reset_password_requests_id_seq
 ALTER TABLE public.reset_password_requests_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3060 (class 0 OID 0)
--- Dependencies: 211
+-- TOC entry 3062 (class 0 OID 0)
+-- Dependencies: 214
 -- Name: reset_password_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -90,7 +90,7 @@ ALTER SEQUENCE public.reset_password_requests_id_seq OWNED BY public.reset_passw
 
 
 --
--- TOC entry 206 (class 1259 OID 33719)
+-- TOC entry 211 (class 1259 OID 115802)
 -- Name: roles; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -103,7 +103,7 @@ CREATE TABLE public.roles (
 ALTER TABLE public.roles OWNER TO postgres;
 
 --
--- TOC entry 205 (class 1259 OID 33717)
+-- TOC entry 210 (class 1259 OID 115800)
 -- Name: roles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -119,8 +119,8 @@ CREATE SEQUENCE public.roles_id_seq
 ALTER TABLE public.roles_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3061 (class 0 OID 0)
--- Dependencies: 205
+-- TOC entry 3063 (class 0 OID 0)
+-- Dependencies: 210
 -- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -128,7 +128,7 @@ ALTER SEQUENCE public.roles_id_seq OWNED BY public.roles.id;
 
 
 --
--- TOC entry 215 (class 1259 OID 107581)
+-- TOC entry 203 (class 1259 OID 107591)
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -141,7 +141,7 @@ CREATE TABLE public.schema_migrations (
 ALTER TABLE public.schema_migrations OWNER TO postgres;
 
 --
--- TOC entry 214 (class 1259 OID 58426)
+-- TOC entry 207 (class 1259 OID 115766)
 -- Name: two_factor_requests; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -160,7 +160,7 @@ CREATE TABLE public.two_factor_requests (
 ALTER TABLE public.two_factor_requests OWNER TO postgres;
 
 --
--- TOC entry 213 (class 1259 OID 58424)
+-- TOC entry 206 (class 1259 OID 115764)
 -- Name: two_factor_requests_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -175,8 +175,8 @@ CREATE SEQUENCE public.two_factor_requests_id_seq
 ALTER TABLE public.two_factor_requests_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3062 (class 0 OID 0)
--- Dependencies: 213
+-- TOC entry 3064 (class 0 OID 0)
+-- Dependencies: 206
 -- Name: two_factor_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -184,7 +184,7 @@ ALTER SEQUENCE public.two_factor_requests_id_seq OWNED BY public.two_factor_requ
 
 
 --
--- TOC entry 210 (class 1259 OID 41947)
+-- TOC entry 209 (class 1259 OID 115786)
 -- Name: user_refresh_tokens; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -202,7 +202,7 @@ CREATE TABLE public.user_refresh_tokens (
 ALTER TABLE public.user_refresh_tokens OWNER TO postgres;
 
 --
--- TOC entry 209 (class 1259 OID 41945)
+-- TOC entry 208 (class 1259 OID 115784)
 -- Name: user_refresh_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -217,8 +217,8 @@ CREATE SEQUENCE public.user_refresh_tokens_id_seq
 ALTER TABLE public.user_refresh_tokens_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3063 (class 0 OID 0)
--- Dependencies: 209
+-- TOC entry 3065 (class 0 OID 0)
+-- Dependencies: 208
 -- Name: user_refresh_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -226,7 +226,7 @@ ALTER SEQUENCE public.user_refresh_tokens_id_seq OWNED BY public.user_refresh_to
 
 
 --
--- TOC entry 208 (class 1259 OID 33730)
+-- TOC entry 213 (class 1259 OID 115813)
 -- Name: user_roles; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -240,7 +240,7 @@ CREATE TABLE public.user_roles (
 ALTER TABLE public.user_roles OWNER TO postgres;
 
 --
--- TOC entry 207 (class 1259 OID 33728)
+-- TOC entry 212 (class 1259 OID 115811)
 -- Name: user_roles_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -255,8 +255,8 @@ CREATE SEQUENCE public.user_roles_id_seq
 ALTER TABLE public.user_roles_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3064 (class 0 OID 0)
--- Dependencies: 207
+-- TOC entry 3066 (class 0 OID 0)
+-- Dependencies: 212
 -- Name: user_roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -264,12 +264,13 @@ ALTER SEQUENCE public.user_roles_id_seq OWNED BY public.user_roles.id;
 
 
 --
--- TOC entry 204 (class 1259 OID 33692)
+-- TOC entry 205 (class 1259 OID 115750)
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
     id bigint NOT NULL,
+    uu_id uuid DEFAULT public.uuid_generate_v4(),
     username character varying NOT NULL,
     password character varying NOT NULL,
     first_name character varying NOT NULL,
@@ -277,7 +278,6 @@ CREATE TABLE public.users (
     email_address character varying NOT NULL,
     phone_number character varying NOT NULL,
     active boolean NOT NULL,
-    uu_id uuid DEFAULT public.uuid_generate_v4(),
     meta_data character varying,
     two_factor_enabled boolean
 );
@@ -286,7 +286,7 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO postgres;
 
 --
--- TOC entry 203 (class 1259 OID 33690)
+-- TOC entry 204 (class 1259 OID 115748)
 -- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -301,8 +301,8 @@ CREATE SEQUENCE public.users_id_seq
 ALTER TABLE public.users_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3065 (class 0 OID 0)
--- Dependencies: 203
+-- TOC entry 3067 (class 0 OID 0)
+-- Dependencies: 204
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
@@ -310,7 +310,7 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- TOC entry 2885 (class 2604 OID 41967)
+-- TOC entry 2886 (class 2604 OID 115834)
 -- Name: reset_password_requests id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -318,7 +318,7 @@ ALTER TABLE ONLY public.reset_password_requests ALTER COLUMN id SET DEFAULT next
 
 
 --
--- TOC entry 2882 (class 2604 OID 33722)
+-- TOC entry 2884 (class 2604 OID 115805)
 -- Name: roles id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -326,7 +326,7 @@ ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_
 
 
 --
--- TOC entry 2886 (class 2604 OID 58429)
+-- TOC entry 2882 (class 2604 OID 115769)
 -- Name: two_factor_requests id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -334,7 +334,7 @@ ALTER TABLE ONLY public.two_factor_requests ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 2884 (class 2604 OID 41950)
+-- TOC entry 2883 (class 2604 OID 115789)
 -- Name: user_refresh_tokens id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -342,7 +342,7 @@ ALTER TABLE ONLY public.user_refresh_tokens ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
--- TOC entry 2883 (class 2604 OID 33733)
+-- TOC entry 2885 (class 2604 OID 115816)
 -- Name: user_roles id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -350,7 +350,7 @@ ALTER TABLE ONLY public.user_roles ALTER COLUMN id SET DEFAULT nextval('public.u
 
 
 --
--- TOC entry 2880 (class 2604 OID 33695)
+-- TOC entry 2880 (class 2604 OID 115753)
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -358,18 +358,18 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
--- TOC entry 3049 (class 0 OID 41964)
--- Dependencies: 212
+-- TOC entry 3054 (class 0 OID 115831)
+-- Dependencies: 215
 -- Data for Name: reset_password_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.reset_password_requests (id, user_id, code, expiry_time, created) FROM stdin;
+COPY public.reset_password_requests (id, user_id, code, created, expiry_time) FROM stdin;
 \.
 
 
 --
--- TOC entry 3043 (class 0 OID 33719)
--- Dependencies: 206
+-- TOC entry 3050 (class 0 OID 115802)
+-- Dependencies: 211
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -380,8 +380,8 @@ COPY public.roles (id, type) FROM stdin;
 
 
 --
--- TOC entry 3052 (class 0 OID 107581)
--- Dependencies: 215
+-- TOC entry 3042 (class 0 OID 107591)
+-- Dependencies: 203
 -- Data for Name: schema_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -391,88 +391,57 @@ COPY public.schema_migrations (version, dirty) FROM stdin;
 
 
 --
--- TOC entry 3051 (class 0 OID 58426)
--- Dependencies: 214
+-- TOC entry 3046 (class 0 OID 115766)
+-- Dependencies: 207
 -- Data for Name: two_factor_requests; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.two_factor_requests (id, user_id, request_id, ip_address, user_agent, code, created_at, expiry_time) FROM stdin;
-61	5	585ce7b90c6d470bd277714751628710f2ee8b4c			813447	2023-08-09 07:46:35.423047	2023-08-09 07:51:35.42318
-64	7	b28a01aa47e1049552b9349c77e319d819307e58			781817	2023-08-09 18:36:41.162146	2023-08-09 18:41:41.162312
-65	5	f8b894a87c6dcaadaeaf7fa2880adbec298eda02			026573	2023-08-09 21:24:31.812427	2023-08-09 21:29:31.813812
-68	5	1752b60b18c7a87e1405bf1ab814b84a4be98352			422666	2023-08-10 14:32:41.100978	2023-08-10 14:37:41.102013
-74	5	5f2500ff7caced204fb644e6727dc7eda44b7ab5			871214	2023-08-14 14:08:17.416056	2023-08-14 14:13:17.416512
-76	5	d1081537de4331a3d637c0508b260cd356bec23d			304181	2023-08-30 10:51:49.234786	2023-08-30 10:56:49.234982
-77	5	74a9be17175ef220fb49a5cef45866cb36b5ffbf			033357	2023-08-31 08:56:28.952844	2023-08-31 09:01:28.95328
-95	5	dd38b5b0c2ee47c05b52e169f1a4e063175141d8			358710	2023-08-31 10:26:47.713834	2023-08-31 10:31:47.714007
 \.
 
 
 --
--- TOC entry 3047 (class 0 OID 41947)
--- Dependencies: 210
+-- TOC entry 3048 (class 0 OID 115786)
+-- Dependencies: 209
 -- Data for Name: user_refresh_tokens; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.user_refresh_tokens (id, user_id, token, created, ip_address, user_agent, expiry_time) FROM stdin;
-1946	5	b16295909889c41468ae69a0c35cb479d57ffff0	2023-08-10 14:07:46.506524	127.0.0.1:40586		2023-08-10 14:22:46.506849
-2708	5	b9abad2eb1f375b6eae63f89f2df11b7290b4be6	2023-09-01 08:46:33.172018			2023-09-01 09:01:33.171864
-2709	5	b990bb586cd930aa146561d3776ec1440ce70948	2023-09-10 10:29:18.324171			2023-09-10 10:44:18.32396
-2710	5	a516c542465e5b02ce1575186eb74824b89e81ab	2023-09-10 14:06:57.273727			2023-09-10 14:06:57.273556
-2711	5	736bbdb9a1bbc1b6387df43446add88aa0a45fb8	2023-09-10 14:07:06.342452			2023-09-10 14:07:06.342242
-2712	5	85c5e3e9621d7ea67b50de2ceb98bd75514afd97	2023-09-10 14:09:20.165465			2023-09-10 14:09:20.165291
-2713	5	ee0094965e51a416494f0477536fa434f52e245d	2023-09-10 19:59:23.92016			2023-09-10 19:59:23.913406
-2024	5	484e0f1d34ff6ff75786dfbc16f2a91649b714e6	2023-08-14 10:44:18.551227	127.0.0.1:52864		2023-08-14 10:59:18.55147
-1868	5	3a5eac29bc089e48f1e10de04a2a4c18b0c354d3	2023-08-09 21:43:50.299511	127.0.0.1:39714		2023-08-09 21:58:50.299719
-1029	5	3032633173af150f2a589787ed066cbe035e98bf	2023-08-06 08:28:24.986244	127.0.0.1:40992		2023-08-06 08:43:24.986483
-2507	5	c7623dc53b7df88fadacb45a790ef7db856123c8	2023-08-15 13:07:05.844344	127.0.0.1:35170		2023-08-15 13:22:05.844766
 \.
 
 
 --
--- TOC entry 3045 (class 0 OID 33730)
--- Dependencies: 208
+-- TOC entry 3052 (class 0 OID 115813)
+-- Dependencies: 213
 -- Data for Name: user_roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.user_roles (id, user_id, role_id) FROM stdin;
-2	3	2
-3	5	2
-1	2	1
-4	7	2
-5	20	2
-6	24	2
 \.
 
 
 --
--- TOC entry 3041 (class 0 OID 33692)
--- Dependencies: 204
+-- TOC entry 3044 (class 0 OID 115750)
+-- Dependencies: 205
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (id, username, password, first_name, last_name, email_address, phone_number, active, uu_id, meta_data, two_factor_enabled) FROM stdin;
-7	prince	$2a$10$qlK90Ys6WWHOMkTgKJCzQ.yafSy31n6pHao8vsIGGHkgvA/l9I6qC	Benjamin 	Owusu Koti botor	oprinnce61@yahoo.com		t	aeba0411-98b6-4858-9f8a-2a421a309c64	\N	t
-5	jackie	$2a$10$nBtWC.KOJyDqizRu9Sv14OXn84rPjZtlPCRxB/ahTxcM0YwISg8IW	Kwesi	Jones	willzako@aol.com	0738455979	t	0fbdc180-6fc1-42bc-a7d7-0c6b2a065bbe	\N	f
-20	tupac	$2a$10$IS0BMDyzJYfPiKbN4cMyKeKANJAIV5lVdzYc4PaVUYYg4t98SLx3e	Tupac	Amaru Shakur	tupac@gmail.com	0660517444	t	28bfa7c7-2c46-4dd4-8f52-2d1bbc525ccd	\N	f
-24	jackson	$2a$10$mqjPVBm3opIi6kEp2zg/Ve6c6Iar4.yLDNT0RPPuYW8JCuJEtjrMa	jackie	Opoku	jackson@gmail.com	0731482947	t	56c7a965-ef6b-44b0-9aae-f64da3132a4f	\N	f
-3	apalo	$2b$10$4KAofVbTqHGRrE8YQfWLieFnizEcqNDVyEvkbjiGJmGyGfiNVhWq.	Jane	Doe	viljoend0@gmail.com	010101010101	t	9f724883-ed0a-4716-9ca9-2666f0da9cef	\N	f
-2	kwesidev	$2b$10$Nt0zoFFWzEIbWYhn6baF6OF.gmhj9Ew2bsMemIg6Qz165RrORQxnK	William	Akomaning	william@lexpro.co.za	0660517444	t	ab54de7b-930b-4306-aa78-11c4b1a18bff	\N	t
+COPY public.users (id, uu_id, username, password, first_name, last_name, email_address, phone_number, active, meta_data, two_factor_enabled) FROM stdin;
 \.
 
 
 --
--- TOC entry 3066 (class 0 OID 0)
--- Dependencies: 211
+-- TOC entry 3068 (class 0 OID 0)
+-- Dependencies: 214
 -- Name: reset_password_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.reset_password_requests_id_seq', 86, true);
+SELECT pg_catalog.setval('public.reset_password_requests_id_seq', 1, false);
 
 
 --
--- TOC entry 3067 (class 0 OID 0)
--- Dependencies: 205
+-- TOC entry 3069 (class 0 OID 0)
+-- Dependencies: 210
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -480,43 +449,43 @@ SELECT pg_catalog.setval('public.roles_id_seq', 2, true);
 
 
 --
--- TOC entry 3068 (class 0 OID 0)
--- Dependencies: 213
+-- TOC entry 3070 (class 0 OID 0)
+-- Dependencies: 206
 -- Name: two_factor_requests_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.two_factor_requests_id_seq', 105, true);
-
-
---
--- TOC entry 3069 (class 0 OID 0)
--- Dependencies: 209
--- Name: user_refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.user_refresh_tokens_id_seq', 2713, true);
-
-
---
--- TOC entry 3070 (class 0 OID 0)
--- Dependencies: 207
--- Name: user_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.user_roles_id_seq', 6, true);
+SELECT pg_catalog.setval('public.two_factor_requests_id_seq', 1, false);
 
 
 --
 -- TOC entry 3071 (class 0 OID 0)
--- Dependencies: 203
+-- Dependencies: 208
+-- Name: user_refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.user_refresh_tokens_id_seq', 1, false);
+
+
+--
+-- TOC entry 3072 (class 0 OID 0)
+-- Dependencies: 212
+-- Name: user_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.user_roles_id_seq', 1, false);
+
+
+--
+-- TOC entry 3073 (class 0 OID 0)
+-- Dependencies: 204
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 31, true);
+SELECT pg_catalog.setval('public.users_id_seq', 1, false);
 
 
 --
--- TOC entry 2898 (class 2606 OID 41974)
+-- TOC entry 2908 (class 2606 OID 115841)
 -- Name: reset_password_requests reset_password_requests_code_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -525,7 +494,7 @@ ALTER TABLE ONLY public.reset_password_requests
 
 
 --
--- TOC entry 2900 (class 2606 OID 41972)
+-- TOC entry 2910 (class 2606 OID 115839)
 -- Name: reset_password_requests reset_password_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -534,7 +503,7 @@ ALTER TABLE ONLY public.reset_password_requests
 
 
 --
--- TOC entry 2892 (class 2606 OID 33727)
+-- TOC entry 2904 (class 2606 OID 115810)
 -- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -543,7 +512,7 @@ ALTER TABLE ONLY public.roles
 
 
 --
--- TOC entry 2908 (class 2606 OID 107585)
+-- TOC entry 2888 (class 2606 OID 107595)
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -552,7 +521,7 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- TOC entry 2902 (class 2606 OID 58438)
+-- TOC entry 2896 (class 2606 OID 115778)
 -- Name: two_factor_requests two_factor_requests_code_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -561,7 +530,7 @@ ALTER TABLE ONLY public.two_factor_requests
 
 
 --
--- TOC entry 2904 (class 2606 OID 58434)
+-- TOC entry 2898 (class 2606 OID 115774)
 -- Name: two_factor_requests two_factor_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -570,7 +539,7 @@ ALTER TABLE ONLY public.two_factor_requests
 
 
 --
--- TOC entry 2906 (class 2606 OID 58436)
+-- TOC entry 2900 (class 2606 OID 115776)
 -- Name: two_factor_requests two_factor_requests_request_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -579,16 +548,7 @@ ALTER TABLE ONLY public.two_factor_requests
 
 
 --
--- TOC entry 2888 (class 2606 OID 33747)
--- Name: users unique_value; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT unique_value UNIQUE (username, email_address);
-
-
---
--- TOC entry 2896 (class 2606 OID 41955)
+-- TOC entry 2902 (class 2606 OID 115794)
 -- Name: user_refresh_tokens user_refresh_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -597,7 +557,7 @@ ALTER TABLE ONLY public.user_refresh_tokens
 
 
 --
--- TOC entry 2894 (class 2606 OID 33735)
+-- TOC entry 2906 (class 2606 OID 115818)
 -- Name: user_roles user_roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -606,7 +566,16 @@ ALTER TABLE ONLY public.user_roles
 
 
 --
--- TOC entry 2890 (class 2606 OID 33700)
+-- TOC entry 2890 (class 2606 OID 115763)
+-- Name: users users_email_address_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_address_key UNIQUE (email_address);
+
+
+--
+-- TOC entry 2892 (class 2606 OID 115759)
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -615,7 +584,16 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 2912 (class 2606 OID 41975)
+-- TOC entry 2894 (class 2606 OID 115761)
+-- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- TOC entry 2915 (class 2606 OID 115842)
 -- Name: reset_password_requests reset_password_requests_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -624,7 +602,7 @@ ALTER TABLE ONLY public.reset_password_requests
 
 
 --
--- TOC entry 2913 (class 2606 OID 58439)
+-- TOC entry 2911 (class 2606 OID 115779)
 -- Name: two_factor_requests two_factor_requests_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -633,7 +611,7 @@ ALTER TABLE ONLY public.two_factor_requests
 
 
 --
--- TOC entry 2911 (class 2606 OID 41956)
+-- TOC entry 2912 (class 2606 OID 115795)
 -- Name: user_refresh_tokens user_refresh_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -642,7 +620,7 @@ ALTER TABLE ONLY public.user_refresh_tokens
 
 
 --
--- TOC entry 2909 (class 2606 OID 33741)
+-- TOC entry 2913 (class 2606 OID 115824)
 -- Name: user_roles user_roles_role_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -651,7 +629,7 @@ ALTER TABLE ONLY public.user_roles
 
 
 --
--- TOC entry 2910 (class 2606 OID 33736)
+-- TOC entry 2914 (class 2606 OID 115819)
 -- Name: user_roles user_roles_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -660,7 +638,7 @@ ALTER TABLE ONLY public.user_roles
 
 
 --
--- TOC entry 3058 (class 0 OID 0)
+-- TOC entry 3060 (class 0 OID 0)
 -- Dependencies: 7
 -- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -669,7 +647,7 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2023-09-15 08:35:49 SAST
+-- Completed on 2023-09-15 08:58:22 SAST
 
 --
 -- PostgreSQL database dump complete
