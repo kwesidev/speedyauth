@@ -13,9 +13,11 @@ RUN go build ./cmd/auth_server
 # Start fresh from a smaller image
 FROM alpine:3.14
 RUN apk add --no-cache bash
+RUN apk add tzdata
 COPY --from=build_base /tmp/auth_server/auth_server /app/auth_server
 COPY --from=build_base /tmp/auth_server/static/email_templates/* /static/email_templates/
-USER root:root
+RUN cp /usr/share/zoneinfo/Africa/Johannesburg /etc/localtime
+RUN echo "Africa/Johannesburg" >  /etc/timezone
 RUN cd /app
 # This container exposes port 8080 to the outside world
 EXPOSE 8080

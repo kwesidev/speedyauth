@@ -8,7 +8,7 @@ services:
       - POSTGRES_PASSWORD=$PG_PASSWORD
       - POSTGRES_DB=$PG_DB
     volumes:
-       - ./database/initial.sql:/docker-entrypoint-initdb.d/create_tables.sql
+       - ./db/sample_data.sql:/docker-entrypoint-initdb.d/create_tables.sql
   app:
     depends_on:
       - postgresqldb
