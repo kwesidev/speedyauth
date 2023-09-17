@@ -23,19 +23,19 @@ func NewAPIServer(serverName string, port string, db *sql.DB) *APIServer {
 	return &APIServer{serverName: serverName, port: port, db: db}
 }
 
-func (this *APIServer) setupRoutes() {
-	this.registerGlobalFunctions()
-	this.registerAdminFunctions()
-	this.registerUserFunctions()
+func (ap *APIServer) setupRoutes() {
+	ap.registerGlobalFunctions()
+	ap.registerAdminFunctions()
+	ap.registerUserFunctions()
 }
 
 // Run  start serving the http requests
-func (this *APIServer) Run() {
-	this.cleanUp()
-	this.setupRoutes()
+func (ap *APIServer) Run() {
+	ap.cleanUp()
+	ap.setupRoutes()
 	// Listen to incoming connections
 	log.Println("Starting Auth Server listening for requests on port " + os.Getenv("SERVER_PORT"))
-	err := http.ListenAndServe(fmt.Sprintf("%s:%s", this.serverName, this.port), middlewares.LogRequest(http.DefaultServeMux))
+	err := http.ListenAndServe(fmt.Sprintf("%s:%s", ap.serverName, ap.port), middlewares.LogRequest(http.DefaultServeMux))
 
 	// Exit if fail to start service
 	if err != nil {
@@ -44,8 +44,8 @@ func (this *APIServer) Run() {
 }
 
 // register Global functions
-func (this *APIServer) registerGlobalFunctions() {
-	authController := controllers.NewAuthController(this.db)
+func (ap *APIServer) registerGlobalFunctions() {
+	authController := controllers.NewAuthController(ap.db)
 	http.HandleFunc("/api/auth/login", middlewares.Method("POST", authController.Login))
 	http.HandleFunc("/api/auth/tokenRefresh", middlewares.Method("POST", authController.RefreshToken))
 	http.HandleFunc("/api/auth/register", middlewares.Method("POST", authController.Register))
@@ -56,21 +56,21 @@ func (this *APIServer) registerGlobalFunctions() {
 }
 
 // register user functions
-func (this *APIServer) registerUserFunctions() {
-	userController := controllers.NewUserController(this.db)
+func (ap *APIServer) registerUserFunctions() {
+	userController := controllers.NewUserController(ap.db)
 	http.HandleFunc("/api/user", middlewares.Method("GET", middlewares.JwtAuth(userController.Index)))
 	http.HandleFunc("/api/user/logout", middlewares.Method("POST", middlewares.JwtAuth(userController.Logout)))
 	http.HandleFunc("/api/user/update", middlewares.Method("POST", middlewares.JwtAuth(userController.Update)))
 }
 
 // register admin functions
-func (this *APIServer) registerAdminFunctions() {
+func (ap *APIServer) registerAdminFunctions() {
 
 }
 
 // Cleanup
-func (this *APIServer) cleanUp() {
-	authService := services.NewAuthService(this.db)
+func (ap *APIServer) cleanUp() {
+	authService := services.NewAuthService(ap.db)
 	// Deletes expired tokens after 30 days
 	err := authService.DeleteExpiredTokens(30)
 	if err != nil {
