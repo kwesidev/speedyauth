@@ -175,6 +175,35 @@ func (authCtrl *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http
 		return
 	}
 	utilities.JSONResponse(w, authResult)
+}
+
+// Validates Two Factor authCtrl function is only called when two factor is required
+func (authCtrl *AuthController) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
+	totpValidateRequest := models.VerifyHOTPRequest{}
+	err := utilities.GetJsonInput(&totpValidateRequest, r)
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Validates requests
+	err = authCtrl.validate.Struct(totpValidateRequest)
+	if err != nil {
+		log.Println(err)
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	userDataToken, err := utilities.ValidateJwtAndGetClaims(totpValidateRequest.Token)
+	if err != nil {
+		utilities.JSONError(w, "Invalid Token", http.StatusBadRequest)
+		return
+	}
+	userId := userDataToken["userId"].(int)
+	authResult, err := authCtrl.authService.VerifyTOTP(userId, totpValidateRequest.Code, "", "")
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	utilities.JSONResponse(w, authResult)
 
 }
 

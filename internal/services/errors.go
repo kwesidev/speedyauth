@@ -17,4 +17,5 @@ var (
 	ErrorTwoFactorRequest = errors.New("Failed to Send Two Factor Request")
 	ErrorInvalidCode      = errors.New("Code is invalid")
 	ErrorServer           = errors.New("Server Error, Try again later")
+	ErrorPassCode         = errors.New("Invalid Passcode")
 )

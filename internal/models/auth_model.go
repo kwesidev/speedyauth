@@ -14,6 +14,12 @@ type AuthenticationResponse struct {
 	Roles            []string `json:"roles,omitempty"`
 	Expires          int      `json:"expiresIn,omitempty"`
 	TwoFactorEnabled bool     `json:"twoFactorEnabled"`
+	TwoFactorType    string   `json:"twoFactorType,omitempty"`
+}
+
+type VerifyHOTPRequest struct {
+	Token string `json:"token"`
+	Code  string `json:"code"`
 }
 
 type VerifyTwoFactorRequest struct {

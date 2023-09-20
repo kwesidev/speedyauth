@@ -52,6 +52,7 @@ func (ap *APIServer) registerGlobalFunctions() {
 	http.HandleFunc("/api/auth/passwordResetRequest", middlewares.Method("POST", authController.PasswordResetRequest))
 	http.HandleFunc("/api/auth/verifyAndResetPassword", middlewares.Method("POST", authController.VerifyAndChangePassword))
 	http.HandleFunc("/api/auth/verifyTwoFactor", middlewares.Method("POST", authController.ValidateTwoFactor))
+	http.HandleFunc("/api/auth/verifyTOTP", middlewares.Method("POST", authController.VerifyTOTP))
 	http.HandleFunc("/health", authController.Health)
 }
 
@@ -61,6 +62,9 @@ func (ap *APIServer) registerUserFunctions() {
 	http.HandleFunc("/api/user", middlewares.Method("GET", middlewares.JwtAuth(userController.Index)))
 	http.HandleFunc("/api/user/logout", middlewares.Method("POST", middlewares.JwtAuth(userController.Logout)))
 	http.HandleFunc("/api/user/update", middlewares.Method("POST", middlewares.JwtAuth(userController.Update)))
+	http.HandleFunc("/api/user/enableTwoFactor", middlewares.Method("POST", middlewares.JwtAuth(userController.EnableTwoFactor)))
+	http.HandleFunc("/api/user/verifyPassCode", middlewares.Method("POST", middlewares.JwtAuth(userController.VerifyPassCode)))
+
 }
 
 // register admin functions

@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/kwesidev/authserver/internal/models"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -70,7 +72,10 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 			users.email_address,
 			users.phone_number,
 			users.active,
-			users.two_factor_enabled
+			users.two_factor_enabled,
+			users.two_factor_type,
+			users.totp_secret ,
+			users.totp_url
 		FROM 
 			users 
 		WHERE 
@@ -80,7 +85,9 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 	row := usrSrv.db.QueryRow(queryString, userId)
 	// Inject the data into the struct
 	err := row.Scan(&userDetails.ID, &userDetails.UUID, &userDetails.Username, &userDetails.FirstName,
-		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active, &userDetails.TwoFactorEnabled)
+		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active, &userDetails.TwoFactorEnabled,
+		&userDetails.TwoFactorType, &userDetails.TOTPSecret, &userDetails.TOTPURL,
+	)
 	roles, _ := usrSrv.GetRoles(userDetails.ID)
 	userDetails.Roles = roles
 	if err != nil {
@@ -88,6 +95,14 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 		return nil
 	}
 	return userDetails
+}
+
+// GetUsername gets the usersDetails by username
+func (usrSrv *UserService) GetByUsername(username string) *models.User {
+	var userId int
+	row := usrSrv.db.QueryRow("SELECT id FROM users WHERE username = $1 OR email_address = $2  LIMIT 1 ", username)
+	row.Scan(&userId)
+	return usrSrv.Get(userId)
 }
 
 // Register a new user
@@ -101,9 +116,9 @@ func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrat
 	defer tx.Rollback()
 	queryString := `
     	INSERT INTO users
-		    (username, password, first_name,last_name, email_address, phone_number, active, two_factor_enabled)
+		    (username, password, first_name,last_name, email_address, phone_number, active, two_factor_enabled ,two_factor_type, totp_secret, totp_url)
 		VALUES
-			($1, $2, $3, $4, $5, $6, true, false) 
+			($1, $2, $3, $4, $5, $6, true, false, 'NONE','','') 
 		RETURNING id ;`
 
 	row := tx.QueryRow(queryString, userRegistrationRequest.Username, string(passwordHash),
@@ -208,4 +223,53 @@ func (usrSrv *UserService) DeleteToken(userId int, refreshToken string) (bool, e
 		return false, err
 	}
 	return true, nil
+}
+
+// EnableTOTP
+func (usrSrv *UserService) EnableTwoFactorTOTP(userId int) (*models.EnableTOTPResponse, error) {
+	userDetails := usrSrv.Get(userId)
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      os.Getenv("ISSUER_NAME"),
+		AccountName: userDetails.Username,
+		SecretSize:  50,
+	})
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	enableTOTPResponse := &models.EnableTOTPResponse{}
+	enableTOTPResponse.URL = key.URL()
+	queryString :=
+		`UPDATE 
+	        users 
+		SET 
+			two_factor_enabled = true , two_factor_type = 'TOTP',
+			totp_secret = $1, totp_url = $2 , totp_created = NOW()
+	    WHERE 
+		    id = $3
+	    `
+	if _, err := usrSrv.db.Exec(queryString, key.Secret(), key.URL(), userId); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return enableTOTPResponse, nil
+}
+
+// EnableTwoFactor SMS OR EMAIL
+func (usrSrv *UserService) EnableTwoFactor(userId int, typeCode string) error {
+	queryString :=
+		`UPDATE 
+	        users 
+		SET 
+			two_factor_enabled = true , two_factor_type = $1,
+			totp_secret = '', totp_url = '' , totp_created = NULL
+	    WHERE 
+		    id = $2
+	    `
+	if _, err := usrSrv.db.Exec(queryString, typeCode, userId); err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }

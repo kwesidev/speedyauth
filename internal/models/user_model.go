@@ -11,8 +11,19 @@ type User struct {
 	Roles            []string `json:"roles"`
 	Active           bool     `json:"active"`
 	TwoFactorEnabled bool     `json:"twoFactorEnabled"`
+	TwoFactorType    string   `json:"twoFactorType"`
+	TOTPSecret       string
+	TOTPURL          string
 }
-
+type EnableTwoFactorRequest struct {
+	Type string `json:"type"`
+}
+type EnableTOTPResponse struct {
+	URL string `json:"url"`
+}
+type VerifyPassCodeRequest struct {
+	Code string `json:"code"`
+}
 type UserRegistrationRequest struct {
 	Username     string `json:"username" validate:"required"`
 	Password     string `json:"password" validate:"required"`

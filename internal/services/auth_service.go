@@ -8,6 +8,7 @@ import (
 
 	"github.com/kwesidev/authserver/internal/models"
 	"github.com/kwesidev/authserver/internal/utilities"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -52,7 +53,17 @@ func (authSrv *AuthService) Login(username, password, ipAddress, userAgent strin
 	}
 	// Check if two authentication is required
 	if userDetails.TwoFactorEnabled {
-		return authSrv.twoFactorRequest(*userDetails, ipAddress, userAgent)
+		if userDetails.TwoFactorType != "TOTP" {
+			return authSrv.twoFactorRequest(*userDetails, ipAddress, userAgent)
+		}
+		// Otherwise its TOTP then
+		authResult := &models.AuthenticationResponse{}
+		// Generate a short token which expires after 5minutes
+		shortToken, _ := utilities.GenerateJwtToken(userId, userDetails.Roles, (time.Second * 300))
+		authResult.TwoFactorEnabled = true
+		authResult.Token = shortToken
+		authResult.TwoFactorType = userDetails.TwoFactorType
+		return authResult, nil
 	}
 	// Get user roles
 	roles, err := authSrv.userService.GetRoles(userId)
@@ -217,9 +228,9 @@ func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress 
 	queryString :=
 		`INSERT 
 		    INTO two_factor_requests 
-            	(user_id, request_id, ip_address, code, user_agent, created_at, expiry_time)
+            	(user_id, request_id, ip_address, code, user_agent, created_at, send_type, expiry_time)
 	        VALUES
-	        	($1, $2 ,$3 ,$4, $5, NOW(), $6)
+	        	($1, $2 ,$3 ,$4, $5, NOW(),'EMAIL', $6)
 	    `
 	if _, err = tx.Exec(queryString, userDetails.ID, requestId, ipAddress, randomCodes, userAgent, time.Now().Add(expires)); err != nil {
 		log.Println(err)
@@ -234,6 +245,7 @@ func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress 
 	}
 	authResult.TwoFactorEnabled = true
 	authResult.Token = requestId
+	authResult.TwoFactorType = userDetails.TwoFactorType
 	return authResult, nil
 }
 
@@ -300,4 +312,22 @@ func (authSrv *AuthService) DeleteExpiredTokens(days int) error {
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for reset_password_requests tokens :", count)
 	return err
+}
+
+// Verify the passcode
+func (authSrv *AuthService) VerifyPassCode(userId int, passCode string) bool {
+	userDetails := authSrv.userService.Get(userId)
+	if valid := totp.Validate(passCode, userDetails.TOTPSecret); !valid {
+		return false
+	}
+	return true
+}
+
+// Validates the TOTP before the user finally logs in
+func (authSrv *AuthService) VerifyTOTP(userId int, passCode, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+	userDetails := authSrv.userService.Get(userId)
+	if authSrv.VerifyPassCode(userId, passCode) {
+		return nil, ErrorPassCode
+	}
+	return authSrv.generateTokenDetails(*userDetails, ipAddress, userAgent)
 }

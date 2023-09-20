@@ -17,6 +17,7 @@ type UserController struct {
 	// Registered Services
 	db          *sql.DB
 	userService services.UserService
+	authService services.AuthService
 	validate    *validator.Validate
 }
 
@@ -25,6 +26,7 @@ func NewUserController(db *sql.DB) *UserController {
 	return &UserController{
 		db:          db,
 		userService: *services.NewUserService(db),
+		authService: *services.NewAuthService(db),
 		validate:    validator.New(),
 	}
 }
@@ -88,4 +90,65 @@ func (usrCtrl *UserController) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 	response.Success = success
 	utilities.JSONResponse(w, response)
+}
+
+// Enable Time based OTP
+func (usrCtrl *UserController) EnableTwoFactor(w http.ResponseWriter, r *http.Request) {
+	enableTwoFactorRequest := models.EnableTwoFactorRequest{}
+	err := utilities.GetJsonInput(&enableTwoFactorRequest, r)
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	claims := r.Context().Value("claims").(map[string]interface{})
+	userId := claims["userId"].(int)
+	if enableTwoFactorRequest.Type == "TOTP" {
+		totpResponse, err := usrCtrl.userService.EnableTwoFactorTOTP(userId)
+		if err != nil {
+			utilities.JSONError(w, "Failed to Enable Two Factor (TOTP)", http.StatusBadRequest)
+			return
+		}
+		utilities.JSONResponse(w, totpResponse)
+		return
+	} else {
+		err := usrCtrl.userService.EnableTwoFactor(userId, enableTwoFactorRequest.Type)
+		if err != nil {
+			utilities.JSONError(w, "Failed to Enabled Two Factor EMAIL OR SMS ", http.StatusBadRequest)
+			return
+		}
+	}
+	response := struct {
+		Success bool `json:"success"`
+	}{}
+	response.Success = true
+	utilities.JSONResponse(w, response)
+}
+
+// Enable Time based OTP
+func (usrCtrl *UserController) VerifyPassCode(w http.ResponseWriter, r *http.Request) {
+	verifyPassCodeRequest := models.VerifyPassCodeRequest{}
+	err := utilities.GetJsonInput(&verifyPassCodeRequest, r)
+	if err != nil {
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Validates requests
+	err = usrCtrl.validate.Struct(verifyPassCodeRequest)
+	if err != nil {
+		log.Println(err)
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	claims := r.Context().Value("claims").(map[string]interface{})
+	userId := claims["userId"].(int)
+	response := struct {
+		Success bool `json:"success"`
+	}{}
+	if usrCtrl.authService.VerifyPassCode(userId, verifyPassCodeRequest.Code) {
+		response.Success = true
+	} else {
+		response.Success = false
+	}
+	utilities.JSONResponse(w, response)
+
 }
