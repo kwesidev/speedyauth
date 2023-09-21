@@ -12,8 +12,8 @@ type User struct {
 	Active           bool     `json:"active"`
 	TwoFactorEnabled bool     `json:"twoFactorEnabled"`
 	TwoFactorType    string   `json:"twoFactorType"`
-	TOTPSecret       string
-	TOTPURL          string
+	TOTPSecret       string   `json:"-"`
+	TOTPURL          string   `json:"-"`
 }
 type EnableTwoFactorRequest struct {
 	Type string `json:"type"`
