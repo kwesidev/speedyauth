@@ -7,11 +7,9 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/kwesidev/authserver/internal/apiserver"
 	"github.com/kwesidev/authserver/internal/utilities"
+	_ "github.com/lib/pq"
 )
 
 var databaseConnection *sql.DB
