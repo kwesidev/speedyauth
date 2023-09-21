@@ -52,7 +52,6 @@ func (ap *APIServer) registerGlobalFunctions() {
 	http.HandleFunc("/api/auth/passwordResetRequest", middlewares.Method("POST", authController.PasswordResetRequest))
 	http.HandleFunc("/api/auth/verifyAndResetPassword", middlewares.Method("POST", authController.VerifyAndChangePassword))
 	http.HandleFunc("/api/auth/verifyTwoFactor", middlewares.Method("POST", authController.ValidateTwoFactor))
-	http.HandleFunc("/api/auth/verifyTOTP", middlewares.Method("POST", authController.VerifyTOTP))
 	http.HandleFunc("/health", authController.Health)
 }
 

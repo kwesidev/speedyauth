@@ -17,14 +17,10 @@ type AuthenticationResponse struct {
 	TwoFactorType    string   `json:"twoFactorType,omitempty"`
 }
 
-type VerifyHOTPRequest struct {
-	Token string `json:"token"`
-	Code  string `json:"code"`
-}
-
 type VerifyTwoFactorRequest struct {
-	RequestId string `json:"requestId" validate:"required"`
-	Code      string `json:"code" validate:"required"`
+	Type  string `json:"type" validate:"required"`
+	Token string `json:"token" validate:"required"`
+	Code  string `json:"code" validate:"required"`
 }
 
 type GeneralErrorResponse struct {

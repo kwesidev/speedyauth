@@ -317,16 +317,16 @@ func (authSrv *AuthService) DeleteExpiredTokens(days int) error {
 // Verify the passcode
 func (authSrv *AuthService) VerifyPassCode(userId int, passCode string) bool {
 	userDetails := authSrv.userService.Get(userId)
-	if valid := totp.Validate(passCode, userDetails.TOTPSecret); !valid {
-		return false
+	if totp.Validate(passCode, userDetails.TOTPSecret) {
+		return true
 	}
-	return true
+	return false
 }
 
 // Validates the TOTP before the user finally logs in
 func (authSrv *AuthService) VerifyTOTP(userId int, passCode, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	userDetails := authSrv.userService.Get(userId)
-	if authSrv.VerifyPassCode(userId, passCode) {
+	if !authSrv.VerifyPassCode(userId, passCode) {
 		return nil, ErrorPassCode
 	}
 	return authSrv.generateTokenDetails(*userDetails, ipAddress, userAgent)

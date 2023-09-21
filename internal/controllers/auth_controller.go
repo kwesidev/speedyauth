@@ -169,42 +169,28 @@ func (authCtrl *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	authResult, err := authCtrl.authService.ValidateTwoFactor(twoFactorRequest.Code, twoFactorRequest.RequestId, "", "")
+	// Check the type of verification
+	var (
+		authResult    *models.AuthenticationResponse
+		userDataToken map[string]interface{}
+	)
+	if twoFactorRequest.Type == "TOTP" {
+		userDataToken, err = utilities.ValidateJwtAndGetClaims(twoFactorRequest.Token)
+		if err != nil {
+			utilities.JSONError(w, "Invalid Token", http.StatusBadRequest)
+			return
+		}
+		userId := userDataToken["userId"].(int)
+		authResult, err = authCtrl.authService.VerifyTOTP(userId, twoFactorRequest.Code, "", "")
+
+	} else {
+		authResult, err = authCtrl.authService.ValidateTwoFactor(twoFactorRequest.Code, twoFactorRequest.Token, "", "")
+	}
 	if err != nil {
-		utilities.JSONError(w, "Failed to Complete the authentication", http.StatusBadRequest)
+		utilities.JSONError(w, "Failed to Complete the authentication, Code provided is wrong", http.StatusBadRequest)
 		return
 	}
 	utilities.JSONResponse(w, authResult)
-}
-
-// Validates Two Factor authCtrl function is only called when two factor is required
-func (authCtrl *AuthController) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
-	totpValidateRequest := models.VerifyHOTPRequest{}
-	err := utilities.GetJsonInput(&totpValidateRequest, r)
-	if err != nil {
-		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	// Validates requests
-	err = authCtrl.validate.Struct(totpValidateRequest)
-	if err != nil {
-		log.Println(err)
-		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	userDataToken, err := utilities.ValidateJwtAndGetClaims(totpValidateRequest.Token)
-	if err != nil {
-		utilities.JSONError(w, "Invalid Token", http.StatusBadRequest)
-		return
-	}
-	userId := userDataToken["userId"].(int)
-	authResult, err := authCtrl.authService.VerifyTOTP(userId, totpValidateRequest.Code, "", "")
-	if err != nil {
-		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	utilities.JSONResponse(w, authResult)
-
 }
 
 // Health
