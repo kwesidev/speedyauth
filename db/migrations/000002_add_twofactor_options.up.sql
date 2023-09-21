@@ -14,7 +14,7 @@ ALTER TABLE users ADD COLUMN totp_url VARCHAR  ;
 UPDATE users SET totp_url = '';
 ALTER TABLE users ADD COLUMN totp_created TIMESTAMP ;
 -- Update previous records send type to email since there was no other option except email
-ALTER TABLE two_factor_requests ADD COLUMN send_type enum_send_type NOT NULL;
+ALTER TABLE two_factor_requests ADD COLUMN send_type enum_send_type ;
 UPDATE two_factor_requests SET send_type = 'EMAIL';
-
+ALTER TABLE two_factor_requests ALTER COLUMN send_type SET  NOT NULL;
 COMMIT;
