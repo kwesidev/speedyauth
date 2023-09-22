@@ -8,7 +8,7 @@ import (
 
 type DatabaseConfig struct {
 	Host        string
-	Userame     string
+	Username    string
 	Password    string
 	Port        string
 	Database    string
@@ -22,7 +22,7 @@ func GetMainDatabaseConnection(config DatabaseConfig) (*sql.DB, error) {
 	sslConnectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=verify-full sslrootcert=%s",
 		config.Host,
 		config.Port,
-		config.Userame,
+		config.Username,
 		config.Password,
 		config.Database,
 		config.Certificate,
@@ -30,7 +30,7 @@ func GetMainDatabaseConnection(config DatabaseConfig) (*sql.DB, error) {
 	normalConnectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		config.Host,
 		config.Port,
-		config.Userame,
+		config.Username,
 		config.Password,
 		config.Database,
 	)

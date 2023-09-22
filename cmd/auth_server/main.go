@@ -23,7 +23,7 @@ func initialize() {
 
 	databaseConfig := utilities.DatabaseConfig{
 		Host:     os.Getenv("PG_HOST"),
-		Userame:  os.Getenv("PG_USER"),
+		Username: os.Getenv("PG_USER"),
 		Password: os.Getenv("PG_PASSWORD"),
 		Port:     os.Getenv("PG_PORT"),
 		Database: os.Getenv("PG_DB"),
