@@ -55,4 +55,10 @@ jobs:
       run: go build -v ./...
 
     - name: Test
+      env:
+        PG_HOST: localhost
+        PG_USER: postgres
+        PG_PASSWORD: postgres
+        PG_PORT: 5432
+        PG_DB: authserver
       run: go test -v ./...
