@@ -6,6 +6,7 @@
 -- Dumped by pg_dump version 15.1 (Ubuntu 15.1-1.pgdg20.04+1)
 
 -- Started on 2023-09-23 07:27:17 SAST
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
