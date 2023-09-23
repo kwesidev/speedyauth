@@ -51,8 +51,8 @@ jobs:
       env:
         PGPASSWORD: postgres
       run: |
-          apt-get update
-          apt-get install --yes --no-install-recommends postgresql-client
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends postgresql-client
           psql -h localhost -U postgres -d authserver  < db/sample_data.sql
      
     - name: "Run DB migrations"
