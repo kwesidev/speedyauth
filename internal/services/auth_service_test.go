@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kwesidev/authserver/internal/models"
 	"github.com/kwesidev/authserver/internal/utilities"
 	_ "github.com/lib/pq"
 )
@@ -26,15 +25,15 @@ func setUp() {
 		log.Fatal("Failed to connect to database")
 		return
 	}
-	userService := NewUserService(db)
-	_, err = userService.Register(models.UserRegistrationRequest{
-		Username:     "john.doe",
-		Password:     "password_2030333",
-		EmailAddress: "johndoe@localhost",
-		FirstName:    "john",
-		LastName:     "doe",
-		CellNumber:   "0731482947",
-	})
+	// userService := NewUserService(db)
+	// _, err = userService.Register(models.UserRegistrationRequest{
+	// 	Username:     "john.doe",
+	// 	Password:     "password_2030333",
+	// 	EmailAddress: "johndoe@localhost",
+	// 	FirstName:    "john",
+	// 	LastName:     "doe",
+	// 	CellNumber:   "0731482947",
+	// })
 
 }
 func TestMain(m *testing.M) {
@@ -44,7 +43,7 @@ func TestMain(m *testing.M) {
 }
 func TestLogin(t *testing.T) {
 	authService := NewAuthService(db)
-	_, err := authService.Login("john.doe", "password_2030333", "", "")
+	_, err := authService.Login("john.doe", "password", "", "")
 	if err != nil {
 		t.Error("Failed to authenticate")
 	}

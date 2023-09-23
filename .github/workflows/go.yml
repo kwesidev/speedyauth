@@ -46,7 +46,15 @@ jobs:
         curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz
         sudo mv migrate /usr/bin/
         which migrate
-
+    
+    - name: "Populate some data"
+      env:
+        PGPASSWORD: postgres
+      run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends postgresql-client
+          psql -h localhost -U postgres -d authserver  < db/sample_data.sql
+     
     - name: "Run DB migrations"
       run: |
           migrate -source file://db/migrations -database 'postgres://postgres:postgres@localhost:5432/authserver?sslmode=disable' up
