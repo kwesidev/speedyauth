@@ -1,5 +1,5 @@
 
-# Auth Server 
+# SpeedyAuth
 ![example workflow](https://github.com/kwesidev/authserver/actions/workflows/go.yml/badge.svg)
 
 A standalone authentication server that streamlines the user authentication process.
