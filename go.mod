@@ -1,4 +1,4 @@
-module github.com/kwesidev/authserver
+module github.com/kwesidev/speedyauth
 
 go 1.19
 
