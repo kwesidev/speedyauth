@@ -57,7 +57,7 @@ jobs:
      
     - name: "Run DB migrations"
       run: |
-          migrate -source file://db/migrations -database 'postgres://postgres:postgres@localhost:5432/authserver?sslmode=disable' up
+          migrate -source file://db/migrations -database 'postgres://postgres:postgres@localhost:5432/speedyauth?sslmode=disable' up
 
     - name: Build
       run: go build -v ./...
