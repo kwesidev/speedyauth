@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kwesidev/authserver/internal/models"
+	"github.com/kwesidev/speedyauth/internal/models"
 )
 
 func GetJsonInput(input interface{}, req *http.Request) error {

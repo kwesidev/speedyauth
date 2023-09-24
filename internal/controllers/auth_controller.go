@@ -9,9 +9,9 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/kwesidev/authserver/internal/models"
-	"github.com/kwesidev/authserver/internal/services"
-	"github.com/kwesidev/authserver/internal/utilities"
+	"github.com/kwesidev/speedyauth/internal/models"
+	"github.com/kwesidev/speedyauth/internal/services"
+	"github.com/kwesidev/speedyauth/internal/utilities"
 )
 
 type AuthController struct {

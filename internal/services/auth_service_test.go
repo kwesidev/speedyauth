@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kwesidev/authserver/internal/utilities"
+	"github.com/kwesidev/speedyauth/internal/utilities"
 	_ "github.com/lib/pq"
 )
 

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kwesidev/authserver/internal/controllers"
-	"github.com/kwesidev/authserver/internal/middlewares"
-	"github.com/kwesidev/authserver/internal/services"
+	"github.com/kwesidev/speedyauth/internal/controllers"
+	"github.com/kwesidev/speedyauth/internal/middlewares"
+	"github.com/kwesidev/speedyauth/internal/services"
 )
 
 type APIServer struct {

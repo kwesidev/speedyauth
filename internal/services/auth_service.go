@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/kwesidev/authserver/internal/models"
-	"github.com/kwesidev/authserver/internal/utilities"
+	"github.com/kwesidev/speedyauth/internal/models"
+	"github.com/kwesidev/speedyauth/internal/utilities"
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )

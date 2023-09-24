@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kwesidev/authserver/internal/models"
+	"github.com/kwesidev/speedyauth/internal/models"
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kwesidev/authserver/internal/utilities"
+	"github.com/kwesidev/speedyauth/internal/utilities"
 )
 
 // Middleware auth handler

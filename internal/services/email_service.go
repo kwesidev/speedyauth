@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/kwesidev/authserver/internal/models"
+	"github.com/kwesidev/speedyauth/internal/models"
 	"gopkg.in/gomail.v2"
 )
 
