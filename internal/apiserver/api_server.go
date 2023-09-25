@@ -34,7 +34,7 @@ func (ap *APIServer) Run() {
 	ap.cleanUp()
 	ap.setupRoutes()
 	// Listen to incoming connections
-	log.Println("Starting Auth Server listening for requests on port " + os.Getenv("SERVER_PORT"))
+	log.Println("Starting SpeedyAuth listening for requests on port " + os.Getenv("SERVER_PORT"))
 	err := http.ListenAndServe(fmt.Sprintf("%s:%s", ap.serverName, ap.port), middlewares.LogRequest(http.DefaultServeMux))
 
 	// Exit if fail to start service
