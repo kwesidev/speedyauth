@@ -4,30 +4,51 @@ services:
     image: postgres:14.1-alpine
     restart: always
     environment:
-      - POSTGRES_USER=$PG_USER
-      - POSTGRES_PASSWORD=$PG_PASSWORD
-      - POSTGRES_DB=$PG_DB
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=speedyauth
+
+  migratedb:
+    image: migrate/migrate
     volumes:
-       - ./db/sample_data.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./db/migrations:/migrations
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:root@postgresqldb:5432/speedyauth?sslmode=disable",
+      ]
+    command: ["up"]
+    depends_on:
+      - postgresqldb
+    links:
+     - postgresqldb
+    restart: on-failure
+
   app:
     depends_on:
       - postgresqldb
+      - migratedb
     build: .
     restart: always
     ports:
      - "8080:8080"
     environment:
       - PG_HOST=postgresqldb
-      - PG_USER=$PG_USER
-      - PG_PASSWORD=$PG_PASSWORD
-      - PG_DB=$PG_DB
-      - PG_PORT=$PG_PORT
+      - PG_USER=postgres
+      - PG_PASSWORD=root
+      - PG_DB=speedyauth
+      - PG_PORT=5432
       - SMTP_HOST=mailhog
-      - SMTP_PORT=$SMTP_PORT
-      - SERVER_PORT=$SERVER_PORT
-      - SERVER_ADDRESS=$SERVER_ADDRESS
+      - SMTP_PORT=1025
+      - SERVER_PORT=8080
+      - SERVER_ADDRESS=
       - PG_SSL=False
       - TOKEN_EXPIRY_TIME=15m
+      - ISSUER_NAME=localhost
+      - FROM_EMAIL_ADDRESS=noreply@localhost
 
   mailhog:
     image: mailhog/mailhog:latest
