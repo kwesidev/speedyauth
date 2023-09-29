@@ -14,7 +14,7 @@ type AuthenticationResponse struct {
 	Roles            []string `json:"roles,omitempty"`
 	Expires          int      `json:"expiresIn,omitempty"`
 	TwoFactorEnabled bool     `json:"twoFactorEnabled"`
-	TwoFactorType    string   `json:"twoFactorType,omitempty"`
+	TwoFactorMethod  string   `json:"twoFactorMethod,omitempty"`
 }
 
 type VerifyTwoFactorRequest struct {
@@ -27,6 +27,9 @@ type GeneralErrorResponse struct {
 	Success      bool   `json:"success"`
 	ErrorMessage string `json:"errorMessage"`
 	Status       int    `json:"status"`
+}
+type SuccessResponse struct {
+	Success bool `json:"success"`
 }
 
 type PasswordResetRequest struct {

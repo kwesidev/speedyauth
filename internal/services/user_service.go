@@ -74,7 +74,7 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 			users.phone_number,
 			users.active,
 			users.two_factor_enabled,
-			users.two_factor_type,
+			users.two_factor_method,
 			users.totp_secret ,
 			users.totp_url
 		FROM 
@@ -87,7 +87,7 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 	// Inject the data into the struct
 	err := row.Scan(&userDetails.ID, &userDetails.UUID, &userDetails.Username, &userDetails.FirstName,
 		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active, &userDetails.TwoFactorEnabled,
-		&userDetails.TwoFactorType, &userDetails.TOTPSecret, &userDetails.TOTPURL,
+		&userDetails.TwoFactorMethod, &userDetails.TOTPSecret, &userDetails.TOTPURL,
 	)
 	roles, _ := usrSrv.GetRoles(userDetails.ID)
 	userDetails.Roles = roles
@@ -121,7 +121,7 @@ func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrat
 	defer tx.Rollback()
 	queryString := `
     	INSERT INTO users
-		    (username, password, first_name,last_name, email_address, phone_number, active, two_factor_enabled ,two_factor_type, totp_secret, totp_url)
+		    (username, password, first_name,last_name, email_address, phone_number, active, two_factor_enabled ,two_factor_method, totp_secret, totp_url)
 		VALUES
 			($1, $2, $3, $4, $5, $6, true, false, 'NONE','','') 
 		RETURNING id ;`

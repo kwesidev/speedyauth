@@ -53,7 +53,7 @@ func (authSrv *AuthService) Login(username, password, ipAddress, userAgent strin
 	}
 	// Check if two authentication is required
 	if userDetails.TwoFactorEnabled {
-		if userDetails.TwoFactorType != "TOTP" {
+		if userDetails.TwoFactorMethod != "TOTP" {
 			return authSrv.twoFactorRequest(*userDetails, ipAddress, userAgent)
 		}
 		// Otherwise its TOTP then
@@ -62,7 +62,7 @@ func (authSrv *AuthService) Login(username, password, ipAddress, userAgent strin
 		shortToken, _ := utilities.GenerateJwtToken(userId, userDetails.Roles, (time.Second * 300))
 		authResult.TwoFactorEnabled = true
 		authResult.Token = shortToken
-		authResult.TwoFactorType = userDetails.TwoFactorType
+		authResult.TwoFactorMethod = userDetails.TwoFactorMethod
 		return authResult, nil
 	}
 	// Get user roles
@@ -248,7 +248,7 @@ func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress 
 	}
 	authResult.TwoFactorEnabled = true
 	authResult.Token = requestId
-	authResult.TwoFactorType = userDetails.TwoFactorType
+	authResult.TwoFactorMethod = userDetails.TwoFactorMethod
 	return authResult, nil
 }
 

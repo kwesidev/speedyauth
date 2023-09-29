@@ -11,7 +11,7 @@ type User struct {
 	Roles            []string `json:"roles"`
 	Active           bool     `json:"active"`
 	TwoFactorEnabled bool     `json:"twoFactorEnabled"`
-	TwoFactorType    string   `json:"twoFactorType"`
+	TwoFactorMethod  string   `json:"twoFactorMethod"`
 	TOTPSecret       string   `json:"-"`
 	TOTPURL          string   `json:"-"`
 }
