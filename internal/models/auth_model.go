@@ -18,9 +18,9 @@ type AuthenticationResponse struct {
 }
 
 type VerifyTwoFactorRequest struct {
-	Type  string `json:"type" validate:"required"`
-	Token string `json:"token" validate:"required"`
-	Code  string `json:"code" validate:"required"`
+	Method string `json:"method" validate:"required"`
+	Token  string `json:"token" validate:"required"`
+	Code   string `json:"code" validate:"required"`
 }
 
 type GeneralErrorResponse struct {

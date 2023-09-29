@@ -168,7 +168,7 @@ func (authCtrl *AuthController) ValidateTwoFactor(w http.ResponseWriter, r *http
 		authResult    *models.AuthenticationResponse
 		userDataToken map[string]interface{}
 	)
-	if twoFactorRequest.Type == "TOTP" {
+	if twoFactorRequest.Method == "TOTP" {
 		userDataToken, err = utilities.ValidateJwtAndGetClaims(twoFactorRequest.Token)
 		if err != nil {
 			utilities.JSONError(w, "Invalid Token", http.StatusBadRequest)
