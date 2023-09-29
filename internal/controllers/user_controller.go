@@ -76,9 +76,7 @@ func (usrCtrl *UserController) Logout(w http.ResponseWriter, r *http.Request) {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	response := struct {
-		Success bool `json:"success"`
-	}{}
+	response := models.SuccessResponse{}
 	claims := r.Context().Value("claims").(map[string]interface{})
 	userId := claims["userId"].(int)
 	success, err := usrCtrl.userService.DeleteToken(userId, tokenRefreshRequest.RefreshToken)
@@ -117,9 +115,7 @@ func (usrCtrl *UserController) EnableTwoFactor(w http.ResponseWriter, r *http.Re
 			return
 		}
 	}
-	response := struct {
-		Success bool `json:"success"`
-	}{}
+	response := models.SuccessResponse{}
 	response.Success = true
 	utilities.JSONResponse(w, response)
 }

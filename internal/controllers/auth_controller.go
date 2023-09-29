@@ -87,9 +87,7 @@ func (authCtrl *AuthController) PasswordResetRequest(w http.ResponseWriter, r *h
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	response := struct {
-		Success bool `json:"success"`
-	}{}
+	response := models.SuccessResponse{}
 	success, err := authCtrl.authService.ResetPasswordRequest(passwordResetRequest.Username)
 	if err != nil {
 		utilities.JSONError(w, "Failed to Send Reset password Request", http.StatusBadRequest)
@@ -115,9 +113,7 @@ func (authCtrl *AuthController) VerifyAndChangePassword(w http.ResponseWriter, r
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	response := struct {
-		Success bool `json:"success"`
-	}{}
+	response := models.SuccessResponse{}
 	success, err := authCtrl.authService.VerifyAndSetNewPassword(verifyAndChangePasswordRequest.Code, verifyAndChangePasswordRequest.Password)
 	if err != nil {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
@@ -142,9 +138,7 @@ func (authCtrl *AuthController) Register(w http.ResponseWriter, r *http.Request)
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	response := struct {
-		Success bool `json:"success"`
-	}{}
+	response := models.SuccessResponse{}
 	regResult, err := authCtrl.userService.Register(userRegisterationRequest)
 	if err != nil {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
