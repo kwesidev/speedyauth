@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -71,4 +72,17 @@ func GenerateRandomDigits(length int) string {
 		randNumbers[i] = strconv.Itoa(random.Intn(9))
 	}
 	return strings.Join(randNumbers, "")
+}
+
+// StrongPasswordCheck
+func StrongPasswordCheck(password string) bool {
+	if len(password) <= 8 {
+		return false
+	}
+	matchChars := regexp.MustCompile(`([a-zA-Z]+[0-9]+[\W]+)`)
+	if !matchChars.Match([]byte(password)) {
+		return false
+	}
+
+	return true
 }

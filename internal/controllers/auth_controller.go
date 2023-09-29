@@ -147,7 +147,7 @@ func (authCtrl *AuthController) Register(w http.ResponseWriter, r *http.Request)
 	}{}
 	regResult, err := authCtrl.userService.Register(userRegisterationRequest)
 	if err != nil {
-		utilities.JSONError(w, services.ErrorRegistration.Error(), http.StatusBadRequest)
+		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	response.Success = regResult

@@ -1,6 +1,7 @@
 package utilities
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -43,6 +44,31 @@ func TestValidateJwtAndGetClaims(t *testing.T) {
 	_, err = ValidateJwtAndGetClaims(token)
 	if err != nil {
 		t.Errorf("%s token is invalid", token)
+	}
+
+}
+
+func TestStrongPasswordCheck(t *testing.T) {
+
+	var tests = []struct {
+		password string
+		want     bool
+	}{
+		{"1234", false},
+		{"password", false},
+		{"W_P12xxx10202@", true},
+		{"073148291", false},
+	}
+
+	for _, tt := range tests {
+		testname := fmt.Sprintf("%s", tt.password)
+		t.Run(testname, func(t *testing.T) {
+			answer := StrongPasswordCheck(tt.password)
+			if answer != tt.want {
+				t.Error("Expected ", tt.want)
+			}
+
+		})
 	}
 
 }

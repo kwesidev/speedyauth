@@ -18,4 +18,5 @@ var (
 	ErrorInvalidCode      = errors.New("Code is invalid")
 	ErrorServer           = errors.New("Server Error, Try again later")
 	ErrorPassCode         = errors.New("Invalid Passcode")
+	ErrStrongPassword     = errors.New("Password must be at least 8 characters and must contain special characters")
 )

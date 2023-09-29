@@ -176,6 +176,9 @@ func (authSrv *AuthService) ResetPasswordRequest(username string) (bool, error) 
 
 // VerifyAndSetNewPassword functions to verify and reset password
 func (authSrv *AuthService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
+	if !utilities.StrongPasswordCheck(password) {
+		return false, ErrStrongPassword
+	}
 	var userId int
 	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()

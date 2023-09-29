@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/kwesidev/speedyauth/internal/models"
+	"github.com/kwesidev/speedyauth/internal/utilities"
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -107,6 +108,10 @@ func (usrSrv *UserService) GetByUsername(username string) *models.User {
 
 // Register a new user
 func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrationRequest) (bool, error) {
+	// Check passwor strength
+	if !utilities.StrongPasswordCheck(userRegistrationRequest.Password) {
+		return false, ErrStrongPassword
+	}
 	// Salt password
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(userRegistrationRequest.Password), 10)
 	if err != nil {
@@ -127,7 +132,7 @@ func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrat
 	var newUserId int
 	if err = row.Scan(&newUserId); err != nil {
 		log.Println(err)
-		return false, err
+		return false, ErrorRegistration
 	}
 	queryString = `
 	    INSERT 
@@ -138,7 +143,7 @@ func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrat
 	    `
 	if _, err = tx.Exec(queryString, newUserId, "USER"); err != nil {
 		log.Println(err)
-		return false, nil
+		return false, ErrorRegistration
 	}
 	if err = tx.Commit(); err != nil {
 		return false, err
