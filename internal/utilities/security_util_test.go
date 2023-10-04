@@ -49,15 +49,18 @@ func TestValidateJwtAndGetClaims(t *testing.T) {
 }
 
 func TestStrongPasswordCheck(t *testing.T) {
-
 	var tests = []struct {
 		password string
 		want     bool
 	}{
 		{"1234", false},
-		{"password", false},
+		{"passwords", false},
 		{"W_P12xxx10202@", true},
 		{"073148291", false},
+		{"@@@@@@AAA3333444511122abbb_000", true},
+		{"..,a,a,,s,s.s11122222AAAa", true},
+		{"...a.a.aa.a.a.a..a.a   wwwAAA221", true},
+		{"01001029299292092AAAAAAAA2", false},
 	}
 
 	for _, tt := range tests {

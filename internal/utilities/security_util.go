@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -76,13 +76,40 @@ func GenerateRandomDigits(length int) string {
 
 // StrongPasswordCheck
 func StrongPasswordCheck(password string) bool {
+	// Check if this password is less than 8 chars
 	if len(password) <= 8 {
 		return false
 	}
-	matchChars := regexp.MustCompile(`([a-zA-Z]+[0-9]+[\W]+)`)
-	if !matchChars.Match([]byte(password)) {
+	// Function to check for special chars
+	specialCharFunc := func(specialChar rune) bool {
+		specialChars := `@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`
+		for _, char := range specialChars {
+			if char == specialChar {
+				return true
+			}
+		}
 		return false
 	}
+	var (
+		isUpper, isLower, isDigit, isSpecialChar bool
+	)
+	for _, char := range password {
+		if unicode.IsDigit(char) {
+			isUpper = true
+		}
+		if unicode.IsUpper(char) {
+			isLower = true
+		}
+		if unicode.IsLower(char) {
+			isDigit = true
+		}
+		if specialCharFunc(char) {
+			isSpecialChar = true
+		}
+	}
 
+	if !isUpper || !isDigit || !isLower || !isSpecialChar {
+		return false
+	}
 	return true
 }
