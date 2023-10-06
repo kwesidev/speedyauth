@@ -41,7 +41,7 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	os.Exit(code)
 }
-func TestLogin(t *testing.T) {
+func TestLoginByUsernamePassword(t *testing.T) {
 	authService := NewAuthService(db)
 	_, err := authService.LoginByUsernamePassword("john.doe", "password", "", "")
 	if err != nil {
