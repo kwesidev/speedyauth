@@ -47,7 +47,7 @@ func (authCtrl *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	authResult, err := authCtrl.authService.Login(authRequest.Username, authRequest.Password, "", "")
+	authResult, err := authCtrl.authService.LoginByUsernamePassword(authRequest.Username, authRequest.Password, "", "")
 	if err != nil {
 		if errors.Is(err, services.ErrorInvalidUsername) || errors.Is(err, services.ErrorInvalidPassword) || errors.Is(err, services.ErrorAccountNotActive) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)

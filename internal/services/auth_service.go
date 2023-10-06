@@ -31,7 +31,7 @@ func NewAuthService(db *sql.DB) *AuthService {
 }
 
 // Login function to authenticate user
-func (authSrv *AuthService) Login(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *AuthService) LoginByUsernamePassword(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var (
 		userId       int
 		passwordHash string
