@@ -74,20 +74,21 @@ func GenerateRandomDigits(length int) string {
 	return strings.Join(randNumbers, "")
 }
 
+// Function to check for special chars
+func checkSpecialChars(specialChar rune) bool {
+	specialChars := `@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`
+	for _, char := range specialChars {
+		if char == specialChar {
+			return true
+		}
+	}
+	return false
+}
+
 // StrongPasswordCheck
 func StrongPasswordCheck(password string) bool {
 	// Check if this password is less than 8 chars
 	if len(password) <= 8 {
-		return false
-	}
-	// Function to check for special chars
-	specialCharFunc := func(specialChar rune) bool {
-		specialChars := `@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`
-		for _, char := range specialChars {
-			if char == specialChar {
-				return true
-			}
-		}
 		return false
 	}
 	var (
@@ -103,7 +104,7 @@ func StrongPasswordCheck(password string) bool {
 		if unicode.IsLower(char) {
 			isDigit = true
 		}
-		if specialCharFunc(char) {
+		if checkSpecialChars(char) {
 			isSpecialChar = true
 		}
 	}
