@@ -55,9 +55,7 @@ func (usrCtrl *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	claims := r.Context().Value("claims").(map[string]interface{})
 	userId := claims["userId"].(int)
-	response := struct {
-		Success bool `json:"success"`
-	}{}
+	response := models.SuccessResponse{}
 	err = usrCtrl.userService.Update(userId, userUpdateRequest)
 	if err != nil {
 		utilities.JSONError(w, "Failed to Update ", http.StatusBadRequest)
@@ -137,9 +135,8 @@ func (usrCtrl *UserController) VerifyPassCode(w http.ResponseWriter, r *http.Req
 	}
 	claims := r.Context().Value("claims").(map[string]interface{})
 	userId := claims["userId"].(int)
-	response := struct {
-		Success bool `json:"success"`
-	}{}
+	response := models.SuccessResponse{}
+
 	if usrCtrl.authService.VerifyPassCode(userId, verifyPassCodeRequest.Code) {
 		response.Success = true
 	} else {
