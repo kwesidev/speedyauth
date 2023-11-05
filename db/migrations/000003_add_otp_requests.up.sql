@@ -8,6 +8,6 @@ CREATE TABLE otp_requests (
     code VARCHAR(6) NOT NULL,
     expiry_time TIMESTAMP NOT NULL,
     send_method enum_send_method NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL
 );
 COMMIT;
