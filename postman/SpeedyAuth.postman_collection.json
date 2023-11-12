@@ -1,0 +1,233 @@
+{
+	"info": {
+		"_postman_id": "10f6e940-6fb2-47ce-9962-0274af673d95",
+		"name": "SpeedyAuth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get User",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/api/user",
+				"description": "Get the user details"
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"refreshToken\":\"a69adff7299c749e89752b234684d76310d0e73e\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/auth/tokenRefresh",
+				"description": "This refreshes the access token and returns a new refresh token as well"
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"john.doe\",\n    \"firstName\":\"John\",\n    \"lastName\":\"Doe\",\n    \"emailAddress\":\"john.doe@localhost.com\",\n    \"password\":\"password_2022W\",\n    \"cellNumber\":\"0731482947\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/auth/register",
+				"description": "Registers a new user"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var res = pm.response.json();",
+							"pm.environment.set(\"token\",res.token);",
+							"pm.environment.set(\"refreshToken\",res.token);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"john.doe\",\n    \"password\":\"password_2022W\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/auth/login",
+				"description": "Endpoint for authenticating users"
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\":\"James\",\n    \"lastName\":\"Opoku\",\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/update",
+				"description": "Endpoint for Update a specific user , valid token is required"
+			},
+			"response": []
+		},
+		{
+			"name": "EnableTwoFactor",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsInJvbGVzIjpbIlVTRVIiXSwiZXhwIjoxNjk1MjkwOTIxfQ.xdCykrfig3YtO-TlEU1Z-SRzCPDNJEhhFL5Lb46ebhw",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"method\":\"TOTP\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/user/enableTwoFactor",
+				"description": "Endpoint for Enabling two Factor authentication ,you need to specify which method to use e.g SMS,EMAIL,TOPT"
+			},
+			"response": []
+		},
+		{
+			"name": "Password Reset Request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"john.doe\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/auth/passwordResetRequest",
+				"description": "Endpoint for resetting the password only a username is required then an email with instructions willl be sent on how to go about it."
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Two Factor",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\":\"TOTP\",\n    \"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVzIjpbIlVTRVIiXSwiZXhwIjoxNjk1MjEwMDgwfQ.lmeVB0ajvXEJy5cz4F3gStxq_JiMkgQWYhXJrfOSQ8s\",\n    \"code\": \"108233\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/auth/verifyTwoFactor",
+				"description": "Verifies Two factor authentication ."
+			},
+			"response": []
+		},
+		{
+			"name": "VerifyTOTP",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVzIjpbIlVTRVIiXSwiZXhwIjoxNjk1MjEwMDgwfQ.lmeVB0ajvXEJy5cz4F3gStxq_JiMkgQWYhXJrfOSQ8s\",\n    \"code\": \"108233\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/api/auth/verifyTOTP",
+				"description": "Verifies the TOPT when the user registers for TOTP"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "anywhere\n"
+		},
+		{
+			"key": "refreshToken",
+			"value": "anywhere\n"
+		}
+	]
+}
