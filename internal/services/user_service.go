@@ -262,17 +262,17 @@ func (usrSrv *UserService) EnableTwoFactorTOTP(userId int) (*models.EnableTOTPRe
 }
 
 // EnableTwoFactor SMS OR EMAIL
-func (usrSrv *UserService) EnableTwoFactor(userId int, typeCode string) error {
+func (usrSrv *UserService) EnableTwoFactor(userId int, methodCode string) error {
 	queryString :=
 		`UPDATE 
 	        users 
 		SET 
-			two_factor_enabled = true , two_factor_type = $1,
+			two_factor_enabled = true , two_factor_method = $1,
 			totp_secret = '', totp_url = '' , totp_created = NULL
 	    WHERE 
 		    id = $2
 	    `
-	if _, err := usrSrv.db.Exec(queryString, typeCode, userId); err != nil {
+	if _, err := usrSrv.db.Exec(queryString, methodCode, userId); err != nil {
 		log.Println(err)
 		return err
 	}
