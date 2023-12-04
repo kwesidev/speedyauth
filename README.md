@@ -10,6 +10,20 @@ An API-only standalone authentication server that streamlines the user authentic
 - User Registration
 - Two factor Authentication (EMAIL,TOTP)
 
-## Dependencies
+## Build Dependencies
 - Go >= 1.19 
 - PostgreSQL >= 9.x 
+
+
+## Build
+```
+make buildserver
+
+```
+
+## Run
+If you docker engine installed run the following command :
+```
+docker compose -f docker-compose-dev.yml up
+
+```
