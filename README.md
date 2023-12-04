@@ -18,12 +18,10 @@ An API-only standalone authentication server that streamlines the user authentic
 ## Build
 ```
 make buildserver
-
 ```
 
 ## Run
 If you docker engine installed run the following command :
 ```
 docker compose -f docker-compose-dev.yml up
-
 ```
