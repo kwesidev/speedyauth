@@ -4,6 +4,19 @@ type AuthenticationRequest struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
+
+type PasswordLessAuthRequest struct {
+	Username   string `json:"username"`
+	SendMethod string `json:"sendMethod"`
+}
+type PasswordLessAuthResponse struct {
+	RequestId  string `json:"requestId" validate:"required"`
+	SendMethod string `json:"sendMethod" validate:"required"`
+}
+type CompletePasswordLessRequest struct {
+	RequestId string `json:"requestId" validate:"required"`
+	Code      string `json:"code" validate:"required"`
+}
 type TokenRefreshRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }

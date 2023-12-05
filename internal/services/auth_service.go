@@ -30,7 +30,7 @@ func NewAuthService(db *sql.DB) *AuthService {
 
 }
 
-// Login function to authenticate user
+// Login function to authenticate user by username and password
 func (authSrv *AuthService) LoginByUsernamePassword(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var (
 		userId       int
@@ -51,28 +51,98 @@ func (authSrv *AuthService) LoginByUsernamePassword(username, password, ipAddres
 	if err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)); err != nil {
 		return nil, ErrorInvalidPassword
 	}
+	return authSrv.generateAuthResponse(*userDetails, ipAddress, userAgent)
+}
+func (authSrv *AuthService) generateAuthResponse(userDetails models.User, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	// Check if two authentication is required
 	if userDetails.TwoFactorEnabled {
 		if userDetails.TwoFactorMethod != "TOTP" {
-			return authSrv.twoFactorRequest(*userDetails, ipAddress, userAgent)
+			return authSrv.twoFactorRequest(userDetails, ipAddress, userAgent)
 		}
 		// Otherwise its TOTP then
 		authResult := &models.AuthenticationResponse{}
 		// Generate a short token which expires after 5minutes
-		shortToken, _ := utilities.GenerateJwtToken(userId, userDetails.Roles, (time.Second * 300))
+		shortToken, _ := utilities.GenerateJwtToken(userDetails.ID, userDetails.Roles, (time.Second * 300))
 		authResult.TwoFactorEnabled = true
 		authResult.Token = shortToken
 		authResult.TwoFactorMethod = userDetails.TwoFactorMethod
 		return authResult, nil
 	}
 	// Get user roles
-	roles, err := authSrv.userService.GetRoles(userId)
+	roles, err := authSrv.userService.GetRoles(userDetails.ID)
 	userDetails.Roles = roles
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	return authSrv.generateTokenDetails(*userDetails, ipAddress, userAgent)
+	return authSrv.generateTokenDetails(userDetails, ipAddress, userAgent)
+}
+
+// Func loginByUsername this will send an otp to the user which then be verified
+func (authSrv *AuthService) PasswordLessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error) {
+	userDetails := authSrv.userService.GetByUsername(username)
+	if userDetails == nil {
+		return nil, ErrorInvalidUsername
+	}
+	if userDetails.Active == false {
+		return nil, ErrorAccountNotActive
+	}
+	tx, err := authSrv.db.Begin()
+	defer tx.Rollback()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	// Generates request ID
+	requestId := utilities.GenerateOpaqueToken(45)
+	// Generate 6 random code
+	randomCodes := utilities.GenerateRandomDigits(6)
+	if _, err = tx.Exec("INSERT INTO otp_requests(user_id, request_id, code, send_method, expiry_time, ip_address, user_agent, created_at) values($1, $2, $3, $4, $5, $6, $7, NOW())", userDetails.ID, requestId, randomCodes, "EMAIL", time.Now().Add(1*time.Minute), ipAddress, userAgent); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if err = authSrv.emailService.SendEmailLoginRequest(randomCodes, *userDetails); err != nil {
+		log.Println("Email Error", err)
+		return nil, ErrSendingMail
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	passwordLessAuthResponse := models.PasswordLessAuthResponse{}
+	passwordLessAuthResponse.RequestId = requestId
+	passwordLessAuthResponse.SendMethod = "EMAIL"
+	return &passwordLessAuthResponse, nil
+}
+
+// Func completePasswordLessLogin
+func (authSrv *AuthService) CompletePasswordLessLogin(code, requestId string) (*models.AuthenticationResponse, error) {
+	var (
+		userId               int
+		userAgent, ipAddress string
+	)
+	println(code, requestId)
+	tx, err := authSrv.db.Begin()
+	defer tx.Rollback()
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	row := tx.QueryRow("SELECT user_id, ip_address,user_agent FROM otp_requests WHERE code = $1 AND request_id = $2 AND expiry_time >= NOW()", code, requestId)
+	row.Scan(&userId, &ipAddress, &userAgent)
+	if userId == 0 {
+		log.Println("Invalid Code or Request Id Invalid")
+		return nil, ErrorInvalidCode
+	}
+	userDetails := authSrv.userService.Get(userId)
+	// Deletes the otp requests
+	if _, err = tx.Exec("DELETE FROM otp_requests WHERE request_id = $1", requestId); err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	return authSrv.generateAuthResponse(*userDetails, ipAddress, userAgent)
 }
 
 // Refresh Token generates a new refresh token that will be used to get a new access token and a refresh token

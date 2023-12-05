@@ -56,7 +56,6 @@ func (emSrv *EmailService) SendTwoFactorRequest(randomCodes string, userDetails 
 	// Get email template from directory and assign random code to it
 	emailTemplateFile, err := template.ParseFiles("static/email_templates/TwoFactorLogin.html")
 	if err != nil {
-		log.Println("Template reading :", err)
 		return err
 	}
 	tmpl := template.Must(emailTemplateFile, err)
@@ -70,6 +69,30 @@ func (emSrv *EmailService) SendTwoFactorRequest(randomCodes string, userDetails 
 	recipient := []string{userDetails.EmailAddress}
 	if err = emSrv.sendEmail(recipient, "Two-factor login", twoFactorRequestTemplateBuffer.String()); err != nil {
 		log.Println("Sending Two Factor Request Email Error", err)
+		return err
+	}
+	return nil
+}
+
+// SendTwoFactorRequest sends two factor mail
+func (emSrv *EmailService) SendEmailLoginRequest(randomCodes string, userDetails models.User) error {
+	var twoFactorRequestTemplateBuffer bytes.Buffer
+	// Get email template from directory and assign random code to it
+	emailTemplateFile, err := template.ParseFiles("static/email_templates/EmailLogin.html")
+	if err != nil {
+		return err
+	}
+	tmpl := template.Must(emailTemplateFile, err)
+	emailTemplateData := struct {
+		FullName   string
+		RandomCode string
+	}{}
+	emailTemplateData.RandomCode = randomCodes
+	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
+	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
+	recipient := []string{userDetails.EmailAddress}
+	if err = emSrv.sendEmail(recipient, "Email login", twoFactorRequestTemplateBuffer.String()); err != nil {
+		log.Println("Sending Email Login Request  Error", err)
 		return err
 	}
 	return nil
