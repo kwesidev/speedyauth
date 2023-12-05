@@ -101,7 +101,7 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 // GetUsername gets the usersDetails by username
 func (usrSrv *UserService) GetByUsername(username string) *models.User {
 	var userId int
-	row := usrSrv.db.QueryRow("SELECT id FROM users WHERE username = $1 OR email_address = $2  LIMIT 1 ", username)
+	row := usrSrv.db.QueryRow("SELECT id FROM users WHERE username = $1 OR email_address = $1  LIMIT 1 ", username)
 	row.Scan(&userId)
 	return usrSrv.Get(userId)
 }
