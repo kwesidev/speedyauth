@@ -9,6 +9,7 @@ An API-only standalone authentication server that streamlines the user authentic
 - Password Recovery
 - User Registration
 - Two factor Authentication (EMAIL,TOTP)
+- Passwordless login through email
 
 ## Build Dependencies
 - Go >= 1.19 
