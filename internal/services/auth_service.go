@@ -79,7 +79,7 @@ func (authSrv *AuthService) generateAuthResponse(userDetails models.User, ipAddr
 }
 
 // Func loginByUsername this will send an otp to the user which then be verified
-func (authSrv *AuthService) PasswordLessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error) {
+func (authSrv *AuthService) PasswordlessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error) {
 	userDetails := authSrv.userService.GetByUsername(username)
 	if userDetails == nil {
 		return nil, ErrorInvalidUsername

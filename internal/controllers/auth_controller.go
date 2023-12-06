@@ -61,7 +61,7 @@ func (authCtrl *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login Handler To Authenticate user without passsword
-func (authCtrl *AuthController) PasswordLessLogin(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) PasswordlessLogin(w http.ResponseWriter, r *http.Request) {
 	passwordLessAuthRequest := models.PasswordLessAuthRequest{}
 	err := utilities.GetJsonInput(&passwordLessAuthRequest, r)
 	if err != nil {
@@ -75,7 +75,7 @@ func (authCtrl *AuthController) PasswordLessLogin(w http.ResponseWriter, r *http
 		return
 	}
 	var passwordLessAuthResponse *models.PasswordLessAuthResponse
-	passwordLessAuthResponse, err = authCtrl.authService.PasswordLessLogin(passwordLessAuthRequest.Username, passwordLessAuthRequest.SendMethod, "", "")
+	passwordLessAuthResponse, err = authCtrl.authService.PasswordlessLogin(passwordLessAuthRequest.Username, passwordLessAuthRequest.SendMethod, "", "")
 	if err != nil {
 		if errors.Is(err, services.ErrorInvalidUsername) || errors.Is(err, services.ErrorInvalidPassword) || errors.Is(err, services.ErrorAccountNotActive) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
@@ -88,7 +88,7 @@ func (authCtrl *AuthController) PasswordLessLogin(w http.ResponseWriter, r *http
 }
 
 // Completes passwordless login
-func (authCtrl *AuthController) CompletePasswordLessLogin(w http.ResponseWriter, r *http.Request) {
+func (authCtrl *AuthController) CompletePasswordlessLogin(w http.ResponseWriter, r *http.Request) {
 	completePasswordLessLogin := models.CompletePasswordLessRequest{}
 	err := utilities.GetJsonInput(&completePasswordLessLogin, r)
 	if err != nil {
