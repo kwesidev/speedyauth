@@ -33,8 +33,7 @@ func NewUserController(db *sql.DB) *UserController {
 
 // Index  Welcome user
 func (usrCtrl *UserController) Index(w http.ResponseWriter, r *http.Request) {
-	claims := r.Context().Value("claims").(map[string]interface{})
-	userId := claims["userId"].(int)
+	userId := utilities.GetUserIdFromHttpConext(r)
 	userDetails := usrCtrl.userService.Get(userId)
 	utilities.JSONResponse(w, userDetails)
 }
@@ -53,8 +52,7 @@ func (usrCtrl *UserController) Update(w http.ResponseWriter, r *http.Request) {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	claims := r.Context().Value("claims").(map[string]interface{})
-	userId := claims["userId"].(int)
+	userId := utilities.GetUserIdFromHttpConext(r)
 	response := models.SuccessResponse{}
 	err = usrCtrl.userService.Update(userId, userUpdateRequest)
 	if err != nil {
@@ -75,10 +73,8 @@ func (usrCtrl *UserController) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := models.SuccessResponse{}
-	claims := r.Context().Value("claims").(map[string]interface{})
-	userId := claims["userId"].(int)
+	userId := utilities.GetUserIdFromHttpConext(r)
 	success, err := usrCtrl.userService.DeleteToken(userId, tokenRefreshRequest.RefreshToken)
-
 	if err != nil {
 		response.Success = false
 		utilities.JSONError(w, "Failed to register", http.StatusBadRequest)
@@ -96,8 +92,7 @@ func (usrCtrl *UserController) EnableTwoFactor(w http.ResponseWriter, r *http.Re
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	claims := r.Context().Value("claims").(map[string]interface{})
-	userId := claims["userId"].(int)
+	userId := utilities.GetUserIdFromHttpConext(r)
 	if enableTwoFactorRequest.Type == "TOTP" {
 		totpResponse, err := usrCtrl.userService.EnableTwoFactorTOTP(userId)
 		if err != nil {
@@ -133,15 +128,12 @@ func (usrCtrl *UserController) VerifyPassCode(w http.ResponseWriter, r *http.Req
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	claims := r.Context().Value("claims").(map[string]interface{})
-	userId := claims["userId"].(int)
+	userId := utilities.GetUserIdFromHttpConext(r)
 	response := models.SuccessResponse{}
-
 	if usrCtrl.authService.VerifyPassCode(userId, verifyPassCodeRequest.Code) {
 		response.Success = true
 	} else {
 		response.Success = false
 	}
 	utilities.JSONResponse(w, response)
-
 }

@@ -9,6 +9,14 @@ import (
 	"github.com/kwesidev/speedyauth/internal/models"
 )
 
+// GetUserId from bearer token stored in http header
+func GetUserIdFromHttpConext(r *http.Request) int {
+	claims := r.Context().Value("claims").(map[string]interface{})
+	userId := claims["userId"].(int)
+	return userId
+}
+
+// Get JsonData from http request
 func GetJsonInput(input interface{}, req *http.Request) error {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
