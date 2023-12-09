@@ -47,8 +47,8 @@ func (ap *APIServer) Run() {
 func (ap *APIServer) registerGlobalFunctions() {
 	authController := controllers.NewAuthController(ap.db)
 	http.HandleFunc("/api/auth/login", middlewares.Method("POST", authController.Login))
-	http.HandleFunc("/api/auth/passwordLessLogin", middlewares.Method("POST", authController.PasswordlessLogin))
-	http.HandleFunc("/api/auth/completePasswordLessLogin", middlewares.Method("POST", authController.CompletePasswordlessLogin))
+	http.HandleFunc("/api/auth/passwordLesslogin", middlewares.Method("POST", authController.PasswordlessLogin))
+	http.HandleFunc("/api/auth/completePasswordlessLogin", middlewares.Method("POST", authController.CompletePasswordlessLogin))
 	http.HandleFunc("/api/auth/tokenRefresh", middlewares.Method("POST", authController.RefreshToken))
 	http.HandleFunc("/api/auth/register", middlewares.Method("POST", authController.Register))
 	http.HandleFunc("/api/auth/passwordResetRequest", middlewares.Method("POST", authController.PasswordResetRequest))
