@@ -47,13 +47,13 @@ func (ap *APIServer) Run() {
 func (ap *APIServer) registerGlobalFunctions() {
 	authController := controllers.NewAuthController(ap.db)
 	http.HandleFunc("/api/auth/login", middlewares.Method("POST", authController.Login))
-	http.HandleFunc("/api/auth/passwordLesslogin", middlewares.Method("POST", authController.PasswordlessLogin))
-	http.HandleFunc("/api/auth/completePasswordlessLogin", middlewares.Method("POST", authController.CompletePasswordlessLogin))
-	http.HandleFunc("/api/auth/tokenRefresh", middlewares.Method("POST", authController.RefreshToken))
+	http.HandleFunc("/api/auth/passwordlesslogin", middlewares.Method("POST", authController.PasswordlessLogin))
+	http.HandleFunc("/api/auth/completepasswordlesslogin", middlewares.Method("POST", authController.CompletePasswordlessLogin))
+	http.HandleFunc("/api/auth/refreshtoken", middlewares.Method("POST", authController.RefreshToken))
 	http.HandleFunc("/api/auth/register", middlewares.Method("POST", authController.Register))
-	http.HandleFunc("/api/auth/passwordResetRequest", middlewares.Method("POST", authController.PasswordResetRequest))
-	http.HandleFunc("/api/auth/verifyAndResetPassword", middlewares.Method("POST", authController.VerifyAndChangePassword))
-	http.HandleFunc("/api/auth/verifyTwoFactor", middlewares.Method("POST", authController.ValidateTwoFactor))
+	http.HandleFunc("/api/auth/resetpasswordrequest", middlewares.Method("POST", authController.PasswordResetRequest))
+	http.HandleFunc("/api/auth/verifyandresetpassword", middlewares.Method("POST", authController.VerifyAndChangePassword))
+	http.HandleFunc("/api/auth/verifytwofactor", middlewares.Method("POST", authController.ValidateTwoFactor))
 	http.HandleFunc("/health", authController.Health)
 }
 
@@ -63,8 +63,8 @@ func (ap *APIServer) registerUserFunctions() {
 	http.HandleFunc("/api/user", middlewares.Method("GET", middlewares.JwtAuth(userController.Index)))
 	http.HandleFunc("/api/user/logout", middlewares.Method("POST", middlewares.JwtAuth(userController.Logout)))
 	http.HandleFunc("/api/user/update", middlewares.Method("POST", middlewares.JwtAuth(userController.Update)))
-	http.HandleFunc("/api/user/enableTwoFactor", middlewares.Method("POST", middlewares.JwtAuth(userController.EnableTwoFactor)))
-	http.HandleFunc("/api/user/verifyPassCode", middlewares.Method("POST", middlewares.JwtAuth(userController.VerifyPassCode)))
+	http.HandleFunc("/api/user/enabletwofactor", middlewares.Method("POST", middlewares.JwtAuth(userController.EnableTwoFactor)))
+	http.HandleFunc("/api/user/verifytotpcode", middlewares.Method("POST", middlewares.JwtAuth(userController.VerifyPassCode)))
 
 }
 
