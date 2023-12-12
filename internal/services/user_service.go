@@ -132,7 +132,7 @@ func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrat
 	var newUserId int
 	if err = row.Scan(&newUserId); err != nil {
 		log.Println(err)
-		return false, ErrorRegistration
+		return false, ErrRegistration
 	}
 	queryString = `
 	    INSERT 
@@ -143,7 +143,7 @@ func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrat
 	    `
 	if _, err = tx.Exec(queryString, newUserId, "USER"); err != nil {
 		log.Println(err)
-		return false, ErrorRegistration
+		return false, ErrRegistration
 	}
 	if err = tx.Commit(); err != nil {
 		return false, err

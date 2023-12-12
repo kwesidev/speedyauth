@@ -41,15 +41,15 @@ func (authSrv *AuthService) LoginByUsernamePassword(username, password, ipAddres
 	row.Scan(&userId, &passwordHash)
 	// Check if username is valid
 	if userId == 0 {
-		return nil, ErrorInvalidUsername
+		return nil, ErrInvalidUsername
 	}
 	userDetails := authSrv.userService.Get(userId)
 	if userDetails.Active == false {
-		return nil, ErrorAccountNotActive
+		return nil, ErrAccountNotActive
 	}
 	// Validates password
 	if err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)); err != nil {
-		return nil, ErrorInvalidPassword
+		return nil, ErrInvalidPassword
 	}
 	return authSrv.generateAuthResponse(*userDetails, ipAddress, userAgent)
 }
@@ -82,10 +82,10 @@ func (authSrv *AuthService) generateAuthResponse(userDetails models.User, ipAddr
 func (authSrv *AuthService) PasswordlessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error) {
 	userDetails := authSrv.userService.GetByUsername(username)
 	if userDetails == nil {
-		return nil, ErrorInvalidUsername
+		return nil, ErrInvalidUsername
 	}
 	if userDetails.Active == false {
-		return nil, ErrorAccountNotActive
+		return nil, ErrAccountNotActive
 	}
 	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
@@ -130,7 +130,7 @@ func (authSrv *AuthService) CompletePasswordLessLogin(code, requestId string) (*
 	row.Scan(&userId, &ipAddress, &userAgent)
 	if userId == 0 {
 		log.Println("Invalid Code or Request Id Invalid")
-		return nil, ErrorInvalidCode
+		return nil, ErrInvalidCode
 	}
 	userDetails := authSrv.userService.Get(userId)
 	// Deletes the otp requests
@@ -154,12 +154,12 @@ func (authSrv *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, use
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Refresh Token is not there")
-		return nil, ErrorInvalidToken
+		return nil, ErrInvalidToken
 	}
 	// Check if account is active before refreshing token
 	userDetails := authSrv.userService.Get(userId)
 	if userDetails.Active == false {
-		return nil, ErrorAccountNotActive
+		return nil, ErrAccountNotActive
 	}
 	roles, _ := authSrv.userService.GetRoles(userId)
 	tokenExpiry := time.Duration(authSrv.tokenTime)
@@ -210,11 +210,11 @@ func (authSrv *AuthService) ResetPasswordRequest(username string) (bool, error) 
 	row := authSrv.db.QueryRow("SELECT id FROM users where username = $1 OR email_address = $1 ", username)
 	if err := row.Scan(&userId); err != nil {
 		log.Println(err)
-		return false, ErrorInvalidUsername
+		return false, ErrInvalidUsername
 	}
 	userDetails := authSrv.userService.Get(userId)
 	if userDetails.Active == false {
-		return false, ErrorAccountNotActive
+		return false, ErrAccountNotActive
 	}
 	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
@@ -259,28 +259,28 @@ func (authSrv *AuthService) VerifyAndSetNewPassword(code string, password string
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Invalid Code")
-		return false, ErrorInvalidCode
+		return false, ErrInvalidCode
 	}
 	// update password and delete all refresh tokens
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
-		return false, ErrorPasswordUpdate
+		return false, ErrPasswordUpdate
 	}
 	if _, err = tx.Exec("UPDATE users SET password = $2 WHERE id = $1", userId, passwordHash); err != nil {
 		log.Println(err)
-		return false, ErrorPasswordUpdate
+		return false, ErrPasswordUpdate
 	}
 	if _, err = tx.Exec("DELETE FROM user_refresh_tokens WHERE user_id = $1", userId); err != nil {
 		log.Println(err)
-		return false, ErrorPasswordUpdate
+		return false, ErrPasswordUpdate
 	}
 	_, err = tx.Exec("DELETE FROM reset_password_requests WHERE user_id = $1", userId)
 	if err != nil {
 		log.Println(err)
-		return false, ErrorPasswordUpdate
+		return false, ErrPasswordUpdate
 	}
 	if err = tx.Commit(); err != nil {
-		return false, ErrorInvalidPassword
+		return false, ErrInvalidPassword
 	}
 	return true, nil
 }
@@ -306,7 +306,7 @@ func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress 
 	    `
 	if _, err = tx.Exec(queryString, userDetails.ID, requestId, ipAddress, randomCodes, userAgent, time.Now().Add(expires)); err != nil {
 		log.Println(err)
-		return nil, ErrorTwoFactorRequest
+		return nil, ErrTwoFactorRequest
 	}
 	if err = authSrv.emailService.SendTwoFactorRequest(randomCodes, userDetails); err != nil {
 		log.Println("Sending Email error", err)
@@ -328,7 +328,7 @@ func (authSrv *AuthService) generateTokenDetails(userDetails models.User, ipAddr
 	jwtToken, err := utilities.GenerateJwtToken(userDetails.ID, userDetails.Roles, tokenExpiry)
 	if err != nil {
 		log.Println(err)
-		return nil, ErrorAccessToken
+		return nil, ErrAccessToken
 	}
 	refreshToken := utilities.GenerateOpaqueToken(45)
 	queryString :=
@@ -341,7 +341,7 @@ func (authSrv *AuthService) generateTokenDetails(userDetails models.User, ipAddr
 	// Generate a jwt and refresh token
 	if _, err = authSrv.db.Exec(queryString, userDetails.ID, refreshToken, ipAddress, userAgent, time.Now().Add(tokenExpiry)); err != nil {
 		log.Println(err)
-		return nil, ErrorTokenGeneration
+		return nil, ErrTokenGeneration
 	}
 	authResult.RefreshToken = refreshToken
 	authResult.Token = jwtToken
@@ -358,11 +358,11 @@ func (authSrv *AuthService) ValidateTwoFactor(code, requestId string, ipAddress,
 	row.Scan(&userId)
 	if userId == 0 {
 		log.Println("Invalid Code")
-		return nil, ErrorTwoFactorCode
+		return nil, ErrTwoFactorCode
 	}
 	if _, err := authSrv.db.Exec("DELETE FROM two_factor_requests WHERE code = $1 AND request_id = $2", code, requestId); err != nil {
 		log.Println(err)
-		return nil, ErrorTwoFactorCode
+		return nil, ErrTwoFactorCode
 	}
 	userDetails := authSrv.userService.Get(userId)
 	return authSrv.generateTokenDetails(*userDetails, ipAddress, userAgent)
@@ -399,7 +399,7 @@ func (authSrv *AuthService) VerifyPassCode(userId int, passCode string) bool {
 func (authSrv *AuthService) VerifyTOTP(userId int, passCode, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	userDetails := authSrv.userService.Get(userId)
 	if !authSrv.VerifyPassCode(userId, passCode) {
-		return nil, ErrorPassCode
+		return nil, ErrPassCode
 	}
 	return authSrv.generateTokenDetails(*userDetails, ipAddress, userAgent)
 }

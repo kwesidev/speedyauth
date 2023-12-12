@@ -50,10 +50,10 @@ func (authCtrl *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	authResult, err = authCtrl.authService.LoginByUsernamePassword(authRequest.Username, authRequest.Password, "", "")
 
 	if err != nil {
-		if errors.Is(err, services.ErrorInvalidUsername) || errors.Is(err, services.ErrorInvalidPassword) || errors.Is(err, services.ErrorAccountNotActive) {
+		if errors.Is(err, services.ErrInvalidUsername) || errors.Is(err, services.ErrInvalidPassword) || errors.Is(err, services.ErrAccountNotActive) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		} else {
-			utilities.JSONError(w, services.ErrorServer.Error(), http.StatusInternalServerError)
+			utilities.JSONError(w, services.ErrServer.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -77,10 +77,10 @@ func (authCtrl *AuthController) PasswordlessLogin(w http.ResponseWriter, r *http
 	var passwordLessAuthResponse *models.PasswordLessAuthResponse
 	passwordLessAuthResponse, err = authCtrl.authService.PasswordlessLogin(passwordLessAuthRequest.Username, passwordLessAuthRequest.SendMethod, "", "")
 	if err != nil {
-		if errors.Is(err, services.ErrorInvalidUsername) || errors.Is(err, services.ErrorInvalidPassword) || errors.Is(err, services.ErrorAccountNotActive) {
+		if errors.Is(err, services.ErrInvalidUsername) || errors.Is(err, services.ErrInvalidPassword) || errors.Is(err, services.ErrAccountNotActive) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		} else {
-			utilities.JSONError(w, services.ErrorServer.Error(), http.StatusInternalServerError)
+			utilities.JSONError(w, services.ErrServer.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -107,10 +107,10 @@ func (authCtrl *AuthController) CompletePasswordlessLogin(w http.ResponseWriter,
 	)
 	authResult, err = authCtrl.authService.CompletePasswordLessLogin(completePasswordLessLogin.Code, completePasswordLessLogin.RequestId)
 	if err != nil {
-		if errors.Is(err, services.ErrorInvalidCode) {
+		if errors.Is(err, services.ErrInvalidCode) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		} else {
-			utilities.JSONError(w, services.ErrorServer.Error(), http.StatusInternalServerError)
+			utilities.JSONError(w, services.ErrServer.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -127,10 +127,10 @@ func (authCtrl *AuthController) RefreshToken(w http.ResponseWriter, r *http.Requ
 	}
 	refreshResult, err := authCtrl.authService.GenerateRefreshToken(tokenRefreshRequest.RefreshToken, r.RemoteAddr, r.UserAgent())
 	if err != nil {
-		if errors.Is(err, services.ErrorInvalidToken) {
+		if errors.Is(err, services.ErrInvalidToken) {
 			utilities.JSONError(w, err.Error(), http.StatusUnauthorized)
 		} else {
-			utilities.JSONError(w, services.ErrorServer.Error(), http.StatusUnauthorized)
+			utilities.JSONError(w, services.ErrServer.Error(), http.StatusUnauthorized)
 		}
 		return
 	}
