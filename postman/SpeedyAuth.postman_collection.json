@@ -2,7 +2,8 @@
 	"info": {
 		"_postman_id": "10f6e940-6fb2-47ce-9962-0274af673d95",
 		"name": "SpeedyAuth",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3770870"
 	},
 	"item": [
 		{
@@ -12,11 +13,22 @@
 				"header": [
 					{
 						"key": "token",
-						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
+						"value": "Bearer {{token}}",
 						"type": "text"
 					}
 				],
-				"url": "http://localhost:8080/api/user",
+				"url": {
+					"raw": "http://localhost:8080/api/user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user"
+					]
+				},
 				"description": "Get the user details"
 			},
 			"response": []
@@ -35,7 +47,20 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/auth/tokenRefresh",
+				"url": {
+					"raw": "http://localhost:8080/api/auth/token/refresh",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"token",
+						"refresh"
+					]
+				},
 				"description": "This refreshes the access token and returns a new refresh token as well"
 			},
 			"response": []
@@ -54,7 +79,19 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/auth/register",
+				"url": {
+					"raw": "http://localhost:8080/api/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				},
 				"description": "Registers a new user"
 			},
 			"response": []
@@ -80,14 +117,26 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\":\"john.doe\",\n    \"password\":\"password_2022W\"\n}\n",
+					"raw": "{\n    \"authType\":\"USER_PASS\",\n    \"username\":\"john.doe\",\n    \"password\":\"\"\n}\n",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/auth/login",
+				"url": {
+					"raw": "http://localhost:8080/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				},
 				"description": "Endpoint for authenticating users"
 			},
 			"response": []
@@ -99,7 +148,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjI0LCJyb2xlcyI6WyJVU0VSIl0sImV4cCI6MTY4MzQ0NjQ0MH0.0q8Tq2Oh6ib4EXPVjxLXFqdQcKPxkXRXaptlLmtDRAM",
+						"value": "Bearer {{token}}",
 						"type": "text"
 					}
 				],
@@ -112,7 +161,19 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/user/update",
+				"url": {
+					"raw": "http://localhost:8080/api/user/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"update"
+					]
+				},
 				"description": "Endpoint for Update a specific user , valid token is required"
 			},
 			"response": []
@@ -124,7 +185,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsInJvbGVzIjpbIlVTRVIiXSwiZXhwIjoxNjk1MjkwOTIxfQ.xdCykrfig3YtO-TlEU1Z-SRzCPDNJEhhFL5Lb46ebhw",
+						"value": "Bearer {{token}}",
 						"type": "text"
 					}
 				],
@@ -137,7 +198,20 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/user/enableTwoFactor",
+				"url": {
+					"raw": "http://localhost:8080/api/user/twofactor/enable",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"twofactor",
+						"enable"
+					]
+				},
 				"description": "Endpoint for Enabling two Factor authentication ,you need to specify which method to use e.g SMS,EMAIL,TOPT"
 			},
 			"response": []
@@ -156,7 +230,21 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/auth/passwordResetRequest",
+				"url": {
+					"raw": "http://localhost:8080/api/auth/password/reset/request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"password",
+						"reset",
+						"request"
+					]
+				},
 				"description": "Endpoint for resetting the password only a username is required then an email with instructions willl be sent on how to go about it."
 			},
 			"response": []
@@ -175,7 +263,20 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/auth/verifyTwoFactor",
+				"url": {
+					"raw": "http://localhost:8080/api/auth/twofactor/verify",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"twofactor",
+						"verify"
+					]
+				},
 				"description": "Verifies Two factor authentication ."
 			},
 			"response": []
@@ -194,8 +295,83 @@
 						}
 					}
 				},
-				"url": "http://localhost:8080/api/auth/verifyTOTP",
+				"url": {
+					"raw": "http://localhost:8080/api/user/totpcode/verify",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"totpcode",
+						"verify"
+					]
+				},
 				"description": "Verifies the TOPT when the user registers for TOTP"
+			},
+			"response": []
+		},
+		{
+			"name": "Email Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"john.doe\",\n    \"sendMethod\":\"EMAIL\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/auth/passwordless/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"passwordless",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CompletePasswordLessLogin",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"requestId\":\"8969baff5eb727c20ef2c88961a3ea2032b32af2\",\n    \"code\":\"750813\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/auth/passwordless/complete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"passwordless",
+						"complete"
+					]
+				}
 			},
 			"response": []
 		}
