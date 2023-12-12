@@ -120,7 +120,6 @@ func (authSrv *AuthService) CompletePasswordLessLogin(code, requestId string) (*
 		userId               int
 		userAgent, ipAddress string
 	)
-	println(code, requestId)
 	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
 	if err != nil {
