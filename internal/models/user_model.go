@@ -14,6 +14,7 @@ type User struct {
 	TwoFactorMethod  string   `json:"twoFactorMethod"`
 	TOTPSecret       string   `json:"-"`
 	TOTPURL          string   `json:"-"`
+	Metadata         JSONB    `json:"metadata"`
 }
 type EnableTwoFactorRequest struct {
 	Type string `json:"type"`
@@ -39,4 +40,5 @@ type UserUpdateRequest struct {
 	LastName                     string `json:"lastName"`
 	CellNumber                   string `json:"cellNumber"`
 	AllowTwoFactorAuthentication bool   `json:"allowTwoFactorAuthentication"`
+	Metadata                     JSONB  `json:"metadata"`
 }

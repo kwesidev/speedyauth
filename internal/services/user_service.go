@@ -76,7 +76,8 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 			users.two_factor_enabled,
 			users.two_factor_method,
 			users.totp_secret ,
-			users.totp_url
+			users.totp_url,
+			users.meta_data
 		FROM 
 			users 
 		WHERE 
@@ -87,7 +88,7 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 	// Inject the data into the struct
 	err := row.Scan(&userDetails.ID, &userDetails.UUID, &userDetails.Username, &userDetails.FirstName,
 		&userDetails.LastName, &userDetails.EmailAddress, &userDetails.CellNumber, &userDetails.Active, &userDetails.TwoFactorEnabled,
-		&userDetails.TwoFactorMethod, &userDetails.TOTPSecret, &userDetails.TOTPURL,
+		&userDetails.TwoFactorMethod, &userDetails.TOTPSecret, &userDetails.TOTPURL, &userDetails.Metadata,
 	)
 	roles, _ := usrSrv.GetRoles(userDetails.ID)
 	userDetails.Roles = roles
@@ -203,8 +204,14 @@ func (usrSrv *UserService) Update(userId int, userUpdateRequest models.UserUpdat
 	}
 	// Update cell number
 	if strings.Trim(userUpdateRequest.CellNumber, "") != "" {
-		query += fmt.Sprintf("cell_number =$%d,", argCount)
+		query += fmt.Sprintf("cell_number =$%d, ", argCount)
 		args = append(args, userUpdateRequest.CellNumber)
+		argCount++
+	}
+
+	if userUpdateRequest.Metadata != nil {
+		query += fmt.Sprintf("meta_data = $%d, ", argCount)
+		args = append(args, userUpdateRequest.Metadata)
 		argCount++
 	}
 	// Remove the trailing comma and space
