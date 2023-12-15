@@ -208,7 +208,7 @@ func (usrSrv *UserService) Update(userId int, userUpdateRequest models.UserUpdat
 		args = append(args, userUpdateRequest.CellNumber)
 		argCount++
 	}
-
+	// Update meta data
 	if userUpdateRequest.Metadata != nil {
 		query += fmt.Sprintf("meta_data = $%d, ", argCount)
 		args = append(args, userUpdateRequest.Metadata)
