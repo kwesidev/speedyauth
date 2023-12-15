@@ -19,4 +19,5 @@ var (
 	ErrServer           = errors.New("Server Error, Try again later")
 	ErrPassCode         = errors.New("Invalid Passcode")
 	ErrStrongPassword   = errors.New("Password must be at least 8 characters and must contain special characters")
+	ErrTOTPExists       = errors.New("TOTP Already Enabled ")
 )

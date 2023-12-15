@@ -17,7 +17,7 @@ type User struct {
 	Metadata         JSONB    `json:"metadata"`
 }
 type EnableTwoFactorRequest struct {
-	Type string `json:"type"`
+	Method string `json:"method"`
 }
 type EnableTOTPResponse struct {
 	URL string `json:"url"`

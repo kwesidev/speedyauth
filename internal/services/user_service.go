@@ -240,6 +240,9 @@ func (usrSrv *UserService) DeleteToken(userId int, refreshToken string) (bool, e
 // EnableTOTP
 func (usrSrv *UserService) EnableTwoFactorTOTP(userId int) (*models.EnableTOTPResponse, error) {
 	userDetails := usrSrv.Get(userId)
+	if userDetails.TwoFactorMethod == "TOTP" {
+		return nil, ErrTOTPExists
+	}
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      os.Getenv("ISSUER_NAME"),
 		AccountName: userDetails.Username,
@@ -255,7 +258,7 @@ func (usrSrv *UserService) EnableTwoFactorTOTP(userId int) (*models.EnableTOTPRe
 		`UPDATE 
 	        users 
 		SET 
-			two_factor_enabled = true , two_factor_type = 'TOTP',
+			two_factor_enabled = true , two_factor_method = 'TOTP',
 			totp_secret = $1, totp_url = $2 , totp_created = NOW()
 	    WHERE 
 		    id = $3

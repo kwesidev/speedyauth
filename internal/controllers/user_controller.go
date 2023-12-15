@@ -93,7 +93,7 @@ func (usrCtrl *UserController) EnableTwoFactor(w http.ResponseWriter, r *http.Re
 		return
 	}
 	userId := utilities.GetUserIdFromHttpConext(r)
-	if enableTwoFactorRequest.Type == "TOTP" {
+	if enableTwoFactorRequest.Method == "TOTP" {
 		totpResponse, err := usrCtrl.userService.EnableTwoFactorTOTP(userId)
 		if err != nil {
 			utilities.JSONError(w, "Failed to Enable Two Factor (TOTP)", http.StatusBadRequest)
@@ -102,7 +102,7 @@ func (usrCtrl *UserController) EnableTwoFactor(w http.ResponseWriter, r *http.Re
 		utilities.JSONResponse(w, totpResponse)
 		return
 	} else {
-		err := usrCtrl.userService.EnableTwoFactor(userId, enableTwoFactorRequest.Type)
+		err := usrCtrl.userService.EnableTwoFactor(userId, enableTwoFactorRequest.Method)
 		if err != nil {
 			utilities.JSONError(w, "Failed to Enabled Two Factor EMAIL OR SMS ", http.StatusBadRequest)
 			return
