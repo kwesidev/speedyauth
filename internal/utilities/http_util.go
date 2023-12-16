@@ -10,7 +10,7 @@ import (
 )
 
 // GetUserId from bearer token stored in http header
-func GetUserIdFromHttpConext(r *http.Request) int {
+func GetUserIdFromHttpContext(r *http.Request) int {
 	claims := r.Context().Value("claims").(map[string]interface{})
 	userId := claims["userId"].(int)
 	return userId

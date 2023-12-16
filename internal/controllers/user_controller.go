@@ -33,7 +33,7 @@ func NewUserController(db *sql.DB) *UserController {
 
 // Index  Welcome user
 func (usrCtrl *UserController) Index(w http.ResponseWriter, r *http.Request) {
-	userId := utilities.GetUserIdFromHttpConext(r)
+	userId := utilities.GetUserIdFromHttpContext(r)
 	userDetails := usrCtrl.userService.Get(userId)
 	utilities.JSONResponse(w, userDetails)
 }
@@ -52,7 +52,7 @@ func (usrCtrl *UserController) Update(w http.ResponseWriter, r *http.Request) {
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	userId := utilities.GetUserIdFromHttpConext(r)
+	userId := utilities.GetUserIdFromHttpContext(r)
 	response := models.SuccessResponse{}
 	err = usrCtrl.userService.Update(userId, userUpdateRequest)
 	if err != nil {
@@ -73,7 +73,7 @@ func (usrCtrl *UserController) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := models.SuccessResponse{}
-	userId := utilities.GetUserIdFromHttpConext(r)
+	userId := utilities.GetUserIdFromHttpContext(r)
 	success, err := usrCtrl.userService.DeleteToken(userId, tokenRefreshRequest.RefreshToken)
 	if err != nil {
 		response.Success = false
@@ -92,7 +92,7 @@ func (usrCtrl *UserController) EnableTwoFactor(w http.ResponseWriter, r *http.Re
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	userId := utilities.GetUserIdFromHttpConext(r)
+	userId := utilities.GetUserIdFromHttpContext(r)
 	if enableTwoFactorRequest.Method == "TOTP" {
 		totpResponse, err := usrCtrl.userService.EnableTwoFactorTOTP(userId)
 		if err != nil {
@@ -128,7 +128,7 @@ func (usrCtrl *UserController) VerifyPassCode(w http.ResponseWriter, r *http.Req
 		utilities.JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	userId := utilities.GetUserIdFromHttpConext(r)
+	userId := utilities.GetUserIdFromHttpContext(r)
 	response := models.SuccessResponse{}
 	if usrCtrl.authService.VerifyPassCode(userId, verifyPassCodeRequest.Code) {
 		response.Success = true
