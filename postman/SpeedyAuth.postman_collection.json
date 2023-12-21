@@ -9,21 +9,23 @@
 		{
 			"name": "Get User",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": [
-					{
-						"key": "token",
-						"value": "Bearer {{token}}",
-						"type": "text"
-					}
-				],
+				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/user",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/user",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"user"
@@ -40,7 +42,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"refreshToken\":\"a69adff7299c749e89752b234684d76310d0e73e\"\n}\n",
+					"raw": "{\n    \"refreshToken\":{{refreshToken}}\n}\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -48,12 +50,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/token/refresh",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/auth/token/refresh",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
@@ -80,12 +80,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/register",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/auth/register",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
@@ -110,6 +108,39 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseurl = pm.environment.get('baseurl');",
+							"const tokenUrl = baseurl + '/api/auth/login';",
+							"var body = {",
+							"    username : \"john.doe\",",
+							"    password : \"password_2022W\"",
+							"};",
+							"",
+							"const getTokenRequest = {",
+							"  method: 'POST',",
+							"  url: tokenUrl,",
+							"  mode: 'raw',",
+							"  body: {",
+							"    mode: 'raw',",
+							"    raw: JSON.stringify(body)",
+							"  }",
+							"};",
+							"",
+							"pm.sendRequest(getTokenRequest, (err, response) => {",
+							"  const jsonResponse = response.json();",
+							"  console.log(jsonResponse);",
+							"  const newAccessToken = jsonResponse.token;",
+							"  console.log(newAccessToken);",
+							"",
+							"  pm.variables.set('token', newAccessToken);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -117,7 +148,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"authType\":\"USER_PASS\",\n    \"username\":\"john.doe\",\n    \"password\":\"\"\n}\n",
+					"raw": "{\n    \"username\":\"john.doe\",\n    \"password\":\"password_2022W\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -125,12 +156,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/login",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/auth/login",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
@@ -144,17 +173,28 @@
 		{
 			"name": "Update User",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer {{token}}",
-						"type": "text"
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVzIjpbIlVTRVIiXSwiZXhwIjoxNzAyNjIwNDk0fQ.nFMZCSdxW54uPYHVm3XRohJ6oyisRS0nbB-gbBN61LE",
+						"type": "text",
+						"disabled": true
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"firstName\":\"James\",\n    \"lastName\":\"Opoku\",\n}",
+					"raw": "{\n    \"firstName\":\"William\"\n\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -162,12 +202,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/user/update",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/user/update",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"user",
@@ -181,12 +219,23 @@
 		{
 			"name": "EnableTwoFactor",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
 						"key": "Authorization",
 						"value": "Bearer {{token}}",
-						"type": "text"
+						"type": "text",
+						"disabled": true
 					}
 				],
 				"body": {
@@ -199,12 +248,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/user/twofactor/enable",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/user/twofactor/enable",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"user",
@@ -231,12 +278,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/password/reset/request",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/auth/password/reset/request",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
@@ -251,6 +296,17 @@
 		},
 		{
 			"name": "Verify Two Factor",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -264,12 +320,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/twofactor/verify",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/auth/twofactor/verify",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
@@ -284,6 +338,16 @@
 		{
 			"name": "VerifyTOTP",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -296,12 +360,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/user/totpcode/verify",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/user/totpcode/verify",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"user",
@@ -328,12 +390,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/passwordless/login",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/auth/passwordless/login",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
@@ -359,12 +419,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/passwordless/complete",
-					"protocol": "http",
+					"raw": "{{baseurl}}/api/auth/passwordless/complete",
 					"host": [
-						"localhost"
+						"{{baseurl}}"
 					],
-					"port": "8080",
 					"path": [
 						"api",
 						"auth",
