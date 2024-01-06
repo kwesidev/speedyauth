@@ -300,7 +300,7 @@ func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress 
 	queryString :=
 		`INSERT 
 		    INTO two_factor_requests 
-            	(user_id, request_id, ip_address, code, user_agent, created_at, send_type, expiry_time)
+            	(user_id, request_id, ip_address, code, user_agent, created_at, send_method, expiry_time)
 	        VALUES
 	        	($1, $2 ,$3 ,$4, $5, NOW(),'EMAIL', $6)
 	    `
