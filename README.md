@@ -21,8 +21,15 @@ An API-only standalone authentication server that streamlines the user authentic
 make buildserver
 ```
 
-## Run
-If you docker engine installed run the following command :
+## Docker 
+If you have docker engine installed run the following command :
 ```
 docker compose -f docker-compose-dev.yml up
+```
+
+## Minikube Cluster
+```
+minikube start cluster
+kubectl apply -f kubernetes_local/
+
 ```
