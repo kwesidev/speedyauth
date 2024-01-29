@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mailhog
+  name: mailhog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailhog
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: mailhog
+    spec:
+      containers:
+        - image: mailhog/mailhog:latest
+          name: mailhog
+          ports:
+            - containerPort: 1025
+            - containerPort: 8025
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mailhog
+  name: mailhog
+spec:
+  ports:
+    - name: "1025"
+      port: 1025
+      targetPort: 1025
+    - name: "8025"
+      port: 8025
+      targetPort: 8025
+  selector:
+    app: mailhog
+status:
+  loadBalancer: {}

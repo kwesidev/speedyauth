@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: postgresqldb
+  name: postgresqldb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresqldb
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: postgresqldb
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: speedyauth
+            - name: POSTGRES_PASSWORD
+              value: root
+            - name: POSTGRES_USER
+              value: postgres
+          image: postgres:16.1-alpine
+          name: postgresqldb
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: postgresqldb
+  name: postgresqldb
+spec:
+  ports:
+    - name: "5432"
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: postgresqldb
+status:
+  loadBalancer: {}
+

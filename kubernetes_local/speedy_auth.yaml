@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: speedyauth
+  name: speedyauth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speedyauth
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: speedyauth
+    spec:
+      initContainers:
+      - name: migrations
+        image: migrate/migrate:latest
+        command: ['/migrate']
+        args: ['-source', 'github://kwesidev/speedyauth/db/migrations', '-database', 'postgres://postgres:root@postgresqldb:5432/speedyauth?sslmode=disable', 'up']
+      containers:
+        - env:
+            - name: FROM_EMAIL_ADDRESS
+              value: noreply@localhost
+            - name: ISSUER_NAME
+              value: localhost
+            - name: PG_DB
+              value: speedyauth
+            - name: PG_HOST
+              value: postgresqldb
+            - name: PG_PASSWORD
+              value: root
+            - name: PG_PORT
+              value: "5432"
+            - name: PG_SSL
+              value: "False"
+            - name: PG_USER
+              value: postgres
+            - name: SERVER_ADDRESS
+            - name: SERVER_PORT
+              value: "8080"
+            - name: SMTP_HOST
+              value: mailhog
+            - name: SMTP_PORT
+              value: "1025"
+            - name: TOKEN_EXPIRY_TIME
+              value: 15m
+          image: kwesidev/speedyauth:latest
+          name: app
+          ports:
+            - containerPort: 8080
+          resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: speedyauth
+  name: speedyauth
+spec:
+  ports:
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: speedyauth
+status:
+  loadBalancer: {}
