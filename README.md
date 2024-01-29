@@ -33,9 +33,7 @@ Start local kubernetes cluster
 minikube start cluster
 ```
 
-```
 Apply Manifests 
 ```
 kubectl apply -f kubernetes_local/
-
 ```
