@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS build_base
+FROM golang:1.22-alpine AS build_base
 RUN apk add --no-cache git
 # Set the Current Working Directory inside the container
 WORKDIR /tmp/speedy_auth
