@@ -47,7 +47,7 @@ spec:
               value: "1025"
             - name: TOKEN_EXPIRY_TIME
               value: 15m
-          image: kwesidev/speedyauth:latest
+          image: ghcr.io/kwesidev/speedyauth:latest
           name: app
           ports:
             - containerPort: 8080
