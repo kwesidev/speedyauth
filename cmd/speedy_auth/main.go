@@ -14,8 +14,11 @@ import (
 
 var databaseConnection *sql.DB
 
+const SERVER_VERSION = "0.1.1"
+
 // initializes the database connections and other connections
 func initialize() {
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Not loading Config from .env")
@@ -49,7 +52,7 @@ func initialize() {
 	// if err := m.Up(); err != nil {
 	// 	log.Fatal(err)
 	// }
-
+	log.Println("Server Version :", SERVER_VERSION)
 	asciiArt := `
 
 ███████ ██████  ███████ ███████ ██████  ██    ██      █████  ██    ██ ████████ ██   ██ 
@@ -61,6 +64,8 @@ func initialize() {
 																																		   																			
 	`
 	log.Println(asciiArt)
+
+	log.Println("")
 }
 func main() {
 	initialize()
