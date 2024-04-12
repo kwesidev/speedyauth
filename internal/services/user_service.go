@@ -25,7 +25,7 @@ func NewUserService(db *sql.DB) *UserService {
 
 // List a bunch of users
 func (usrSrv *UserService) List(offset int, limit int) ([]models.User, error) {
-	users := []models.User{}
+	users := make([]models.User, 0)
 	// Get the list of users
 	queryString :=
 		`SELECT 
