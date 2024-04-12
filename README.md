@@ -24,7 +24,7 @@ make buildserver
 ## Docker 
 If you have docker engine installed run the following command :
 ```
-docker compose -f docker-compose-dev.yml up
+docker compose -f docker-compose-dev.yml up --build
 ```
 
 ## Minikube Cluster
