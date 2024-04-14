@@ -2,12 +2,11 @@ version: '3.9'
 services:
   postgresqldb:
     image: postgres:16.2-alpine
-    restart: always
+    restart: on-failure
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=root
       - POSTGRES_DB=speedyauth
-
   migratedb:
     image: migrate/migrate
     volumes:
@@ -32,7 +31,7 @@ services:
       - postgresqldb
       - migratedb
     build: .
-    restart: always
+    restart: on-failure
     ports:
      - "8080:8080"
     environment:
