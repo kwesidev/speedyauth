@@ -12,19 +12,31 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type AuthServiceInterface interface {
+	LoginByUsernamePassword(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error)
+	PasswordlessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error)
+	CompletePasswordLessLogin(code, requestId string) (*models.AuthenticationResponse, error)
+	ResetPasswordRequest(username string) (bool, error)
+	GenerateRefreshToken(oldRefreshToken, ipAddress, userAgent string) (*models.AuthenticationResponse, error)
+	VerifyAndSetNewPassword(code string, password string) (bool, error)
+	DeleteExpiredTokens(days int) error
+	VerifyPassCode(userId int, passCode string) bool
+	VerifyTOTP(userId int, passCode, ipAddress, userAgent string) (*models.AuthenticationResponse, error)
+	ValidateTwoFactor(code, requestId string, ipAddress, userAgent string) (*models.AuthenticationResponse, error)
+}
 type AuthService struct {
 	db           *sql.DB
-	userService  *UserService
-	emailService *EmailService
+	userService  UserServiceInterface
+	emailService EmailServiceInterface
 	tokenTime    time.Duration
 }
 
-func NewAuthService(db *sql.DB) *AuthService {
+func NewAuthService(db *sql.DB, userService UserServiceInterface, emailService EmailServiceInterface) *AuthService {
 	tokenTime, _ := time.ParseDuration(os.Getenv("TOKEN_EXPIRY_TIME"))
 	return &AuthService{
 		db:           db,
-		userService:  NewUserService(db),
-		emailService: NewEmailService(true),
+		userService:  userService,
+		emailService: emailService,
 		tokenTime:    tokenTime,
 	}
 
@@ -44,7 +56,7 @@ func (authSrv *AuthService) LoginByUsernamePassword(username, password, ipAddres
 		return nil, ErrInvalidUsername
 	}
 	userDetails := authSrv.userService.Get(userId)
-	if userDetails.Active == false {
+	if !userDetails.Active {
 		return nil, ErrAccountNotActive
 	}
 	// Validates password
@@ -84,7 +96,7 @@ func (authSrv *AuthService) PasswordlessLogin(username, sendMethod, ipAddress, u
 	if userDetails == nil {
 		return nil, ErrInvalidUsername
 	}
-	if userDetails.Active == false {
+	if !userDetails.Active {
 		return nil, ErrAccountNotActive
 	}
 	tx, err := authSrv.db.Begin()
@@ -158,7 +170,7 @@ func (authSrv *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, use
 	}
 	// Check if account is active before refreshing token
 	userDetails := authSrv.userService.Get(userId)
-	if userDetails.Active == false {
+	if !userDetails.Active {
 		return nil, ErrAccountNotActive
 	}
 	roles, _ := authSrv.userService.GetRoles(userId)
@@ -213,7 +225,7 @@ func (authSrv *AuthService) ResetPasswordRequest(username string) (bool, error) 
 		return false, ErrInvalidUsername
 	}
 	userDetails := authSrv.userService.Get(userId)
-	if userDetails.Active == false {
+	if !userDetails.Active {
 		return false, ErrAccountNotActive
 	}
 	tx, err := authSrv.db.Begin()
@@ -373,10 +385,16 @@ func (authSrv *AuthService) ValidateTwoFactor(code, requestId string, ipAddress,
 func (authSrv *AuthService) DeleteExpiredTokens(days int) error {
 	// Deletes User Refresh tokens
 	result, err := authSrv.db.Exec("DELETE FROM user_refresh_tokens WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
+	if err != nil {
+		return err
+	}
 	count, _ := result.RowsAffected()
 	log.Println("DELETED number of rows for user expired tokens :", count)
 	// Deletes Two factor requests
 	result, err = authSrv.db.Exec("DELETE FROM two_factor_requests WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
+	if err != nil {
+		return err
+	}
 	count, _ = result.RowsAffected()
 	log.Println("DELETED number of rows for two_factor_requests tokens :", count)
 	// Delete Reset Password Requests
@@ -389,10 +407,7 @@ func (authSrv *AuthService) DeleteExpiredTokens(days int) error {
 // Verify the passcode
 func (authSrv *AuthService) VerifyPassCode(userId int, passCode string) bool {
 	userDetails := authSrv.userService.Get(userId)
-	if totp.Validate(passCode, userDetails.TOTPSecret) {
-		return true
-	}
-	return false
+	return totp.Validate(passCode, userDetails.TOTPSecret)
 }
 
 // Validates the TOTP before the user finally logs in

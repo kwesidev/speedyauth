@@ -13,6 +13,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type UserServiceInterface interface {
+	List(offset int, limit int) ([]models.User, error)
+	Get(userId int) *models.User
+	GetByUsername(username string) *models.User
+	GetRoles(userId int) ([]string, error)
+	Update(userId int, userUpdateRequest models.UserUpdateRequest) error
+	DeleteToken(userId int, refreshToken string) (bool, error)
+	EnableTwoFactorTOTP(userId int) (*models.EnableTOTPResponse, error)
+	EnableTwoFactor(userId int, methodCode string) error
+	Register(userRegistrationRequest models.UserRegistrationRequest) (bool, error)
+}
+
 type UserService struct {
 	db *sql.DB
 }

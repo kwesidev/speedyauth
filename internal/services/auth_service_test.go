@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 func TestLoginByUsernamePassword(t *testing.T) {
-	authService := NewAuthService(db)
+	authService := NewAuthService(db, nil, nil)
 	_, err := authService.LoginByUsernamePassword("john.doe", "password", "", "")
 	if err != nil {
 		t.Error("Failed to authenticate")

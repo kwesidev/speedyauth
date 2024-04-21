@@ -13,9 +13,12 @@ import (
 )
 
 type APIServer struct {
-	port       string
-	serverName string
-	db         *sql.DB
+	port         string
+	serverName   string
+	db           *sql.DB
+	userService  services.UserServiceInterface
+	authService  services.AuthServiceInterface
+	emailService *services.EmailService
 }
 
 // NewAPIServer initializes the api server
@@ -23,20 +26,26 @@ func NewAPIServer(serverName string, port string, db *sql.DB) *APIServer {
 	return &APIServer{serverName: serverName, port: port, db: db}
 }
 
-func (ap *APIServer) setupRoutes() {
-	ap.registerGlobalFunctions()
-	ap.registerAdminFunctions()
-	ap.registerUserFunctions()
+func (api *APIServer) setupRoutes() {
+	api.registerGlobalFunctions()
+	api.registerAdminFunctions()
+	api.registerUserFunctions()
+}
+
+func (api *APIServer) setUpServices() {
+	api.emailService = services.NewEmailService(true)
+	api.userService = services.NewUserService(api.db)
+	api.authService = services.NewAuthService(api.db, api.userService, api.emailService)
 }
 
 // Run  start serving the http requests
-func (ap *APIServer) Run() {
-	ap.cleanUp()
-	ap.setupRoutes()
+func (api *APIServer) Run() {
+	api.setUpServices()
+	api.setupRoutes()
+	api.cleanUp()
 	// Listen to incoming connections
 	log.Println("Starting SpeedyAuth listening for requests on port " + os.Getenv("SERVER_PORT"))
-	err := http.ListenAndServe(fmt.Sprintf("%s:%s", ap.serverName, ap.port), middlewares.LogRequest(http.DefaultServeMux))
-
+	err := http.ListenAndServe(fmt.Sprintf("%s:%s", api.serverName, api.port), middlewares.LogRequest(http.DefaultServeMux))
 	// Exit if fail to start service
 	if err != nil {
 		log.Fatal("Failed to start Service ")
@@ -44,8 +53,8 @@ func (ap *APIServer) Run() {
 }
 
 // register Global functions
-func (ap *APIServer) registerGlobalFunctions() {
-	authController := controllers.NewAuthController(ap.db)
+func (api *APIServer) registerGlobalFunctions() {
+	authController := controllers.NewAuthController(api.db, api.authService, api.userService)
 	http.HandleFunc("/api/auth/login", middlewares.Method("POST", authController.Login))
 	http.HandleFunc("/api/auth/passwordless/login", middlewares.Method("POST", authController.PasswordlessLogin))
 	http.HandleFunc("/api/auth/passwordless/complete", middlewares.Method("POST", authController.CompletePasswordlessLogin))
@@ -59,8 +68,8 @@ func (ap *APIServer) registerGlobalFunctions() {
 
 // register user functions
 
-func (ap *APIServer) registerUserFunctions() {
-	userController := controllers.NewUserController(ap.db)
+func (api *APIServer) registerUserFunctions() {
+	userController := controllers.NewUserController(api.db, api.userService, api.authService)
 	http.HandleFunc("/api/user", middlewares.Method("GET", middlewares.JwtAuth(userController.Index)))
 	http.HandleFunc("/api/user/logout", middlewares.Method("POST", middlewares.JwtAuth(userController.Logout)))
 	http.HandleFunc("/api/user/update", middlewares.Method("POST", middlewares.JwtAuth(userController.Update)))
@@ -70,15 +79,14 @@ func (ap *APIServer) registerUserFunctions() {
 }
 
 // register admin functions
-func (ap *APIServer) registerAdminFunctions() {
+func (api *APIServer) registerAdminFunctions() {
 
 }
 
 // Cleanup
-func (ap *APIServer) cleanUp() {
-	authService := services.NewAuthService(ap.db)
-	// Deletes expired tokens after 30 days
-	err := authService.DeleteExpiredTokens(30)
+func (api *APIServer) cleanUp() {
+	//Deletes expired tokens after 30 days
+	err := api.authService.DeleteExpiredTokens(30)
 	if err != nil {
 		log.Fatal("There was a problem cleaning up ")
 	}

@@ -12,6 +12,11 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+type EmailServiceInterface interface {
+	SendTwoFactorRequest(randomCodes string, userDetails models.User) error
+	SendEmailLoginRequest(randomCodes string, userDetails models.User) error
+	SendPasswordResetRequest(randomCodes string, userDetails models.User) error
+}
 type EmailService struct {
 	smtpHost         string
 	smtpUsername     string

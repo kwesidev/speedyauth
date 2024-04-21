@@ -16,17 +16,17 @@ import (
 type UserController struct {
 	// Registered Services
 	db          *sql.DB
-	userService services.UserService
-	authService services.AuthService
+	userService services.UserServiceInterface
+	authService services.AuthServiceInterface
 	validate    *validator.Validate
 }
 
 // Creates a new User Controller for passing requests
-func NewUserController(db *sql.DB) *UserController {
+func NewUserController(db *sql.DB, userService services.UserServiceInterface, authService services.AuthServiceInterface) *UserController {
 	return &UserController{
 		db:          db,
-		userService: *services.NewUserService(db),
-		authService: *services.NewAuthService(db),
+		userService: userService,
+		authService: authService,
 		validate:    validator.New(),
 	}
 }
