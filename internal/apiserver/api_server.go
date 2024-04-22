@@ -16,9 +16,9 @@ type APIServer struct {
 	port         string
 	serverName   string
 	db           *sql.DB
-	userService  services.UserServiceInterface
-	authService  services.AuthServiceInterface
-	emailService *services.EmailService
+	userService  services.UserService
+	authService  services.AuthService
+	emailService services.EmailService
 }
 
 // NewAPIServer initializes the api server

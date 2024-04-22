@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthServiceInterface interface {
+type AuthService interface {
 	LoginByUsernamePassword(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error)
 	PasswordlessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error)
 	CompletePasswordLessLogin(code, requestId string) (*models.AuthenticationResponse, error)
@@ -24,16 +24,16 @@ type AuthServiceInterface interface {
 	VerifyTOTP(userId int, passCode, ipAddress, userAgent string) (*models.AuthenticationResponse, error)
 	ValidateTwoFactor(code, requestId string, ipAddress, userAgent string) (*models.AuthenticationResponse, error)
 }
-type AuthService struct {
+type authService struct {
 	db           *sql.DB
-	userService  UserServiceInterface
-	emailService EmailServiceInterface
+	userService  UserService
+	emailService EmailService
 	tokenTime    time.Duration
 }
 
-func NewAuthService(db *sql.DB, userService UserServiceInterface, emailService EmailServiceInterface) *AuthService {
+func NewAuthService(db *sql.DB, userService UserService, emailService EmailService) AuthService {
 	tokenTime, _ := time.ParseDuration(os.Getenv("TOKEN_EXPIRY_TIME"))
-	return &AuthService{
+	return &authService{
 		db:           db,
 		userService:  userService,
 		emailService: emailService,
@@ -43,7 +43,7 @@ func NewAuthService(db *sql.DB, userService UserServiceInterface, emailService E
 }
 
 // Login function to authenticate user by username and password
-func (authSrv *AuthService) LoginByUsernamePassword(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) LoginByUsernamePassword(username, password, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var (
 		userId       int
 		passwordHash string
@@ -65,7 +65,7 @@ func (authSrv *AuthService) LoginByUsernamePassword(username, password, ipAddres
 	}
 	return authSrv.generateAuthResponse(*userDetails, ipAddress, userAgent)
 }
-func (authSrv *AuthService) generateAuthResponse(userDetails models.User, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) generateAuthResponse(userDetails models.User, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	// Check if two authentication is required
 	if userDetails.TwoFactorEnabled {
 		if userDetails.TwoFactorMethod != "TOTP" {
@@ -91,7 +91,7 @@ func (authSrv *AuthService) generateAuthResponse(userDetails models.User, ipAddr
 }
 
 // Func loginByUsername this will send an otp to the user which then be verified
-func (authSrv *AuthService) PasswordlessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error) {
+func (authSrv *authService) PasswordlessLogin(username, sendMethod, ipAddress, userAgent string) (*models.PasswordLessAuthResponse, error) {
 	userDetails := authSrv.userService.GetByUsername(username)
 	if userDetails == nil {
 		return nil, ErrInvalidUsername
@@ -127,7 +127,7 @@ func (authSrv *AuthService) PasswordlessLogin(username, sendMethod, ipAddress, u
 }
 
 // Func completePasswordLessLogin
-func (authSrv *AuthService) CompletePasswordLessLogin(code, requestId string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) CompletePasswordLessLogin(code, requestId string) (*models.AuthenticationResponse, error) {
 	var (
 		userId               int
 		userAgent, ipAddress string
@@ -157,7 +157,7 @@ func (authSrv *AuthService) CompletePasswordLessLogin(code, requestId string) (*
 }
 
 // Refresh Token generates a new refresh token that will be used to get a new access token and a refresh token
-func (authSrv *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) GenerateRefreshToken(oldRefreshToken, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var (
 		userId int
 	)
@@ -214,7 +214,7 @@ func (authSrv *AuthService) GenerateRefreshToken(oldRefreshToken, ipAddress, use
 	return authResult, nil
 }
 
-func (authSrv *AuthService) ResetPasswordRequest(username string) (bool, error) {
+func (authSrv *authService) ResetPasswordRequest(username string) (bool, error) {
 	//check if the username exists and then send vertification code
 	var (
 		userId int
@@ -256,7 +256,7 @@ func (authSrv *AuthService) ResetPasswordRequest(username string) (bool, error) 
 }
 
 // VerifyAndSetNewPassword functions to verify and reset password
-func (authSrv *AuthService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
+func (authSrv *authService) VerifyAndSetNewPassword(code string, password string) (bool, error) {
 	if !utilities.StrongPasswordCheck(password) {
 		return false, ErrStrongPassword
 	}
@@ -297,7 +297,7 @@ func (authSrv *AuthService) VerifyAndSetNewPassword(code string, password string
 	return true, nil
 }
 
-func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) twoFactorRequest(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
 	tx, err := authSrv.db.Begin()
 	defer tx.Rollback()
 	if err != nil {
@@ -333,7 +333,7 @@ func (authSrv *AuthService) twoFactorRequest(userDetails models.User, ipAddress 
 	return authResult, nil
 }
 
-func (authSrv *AuthService) generateTokenDetails(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) generateTokenDetails(userDetails models.User, ipAddress string, userAgent string) (*models.AuthenticationResponse, error) {
 	authResult := &models.AuthenticationResponse{}
 	tokenExpiry := time.Duration(authSrv.tokenTime)
 	// Generates JWT Token and Refresh token that expires after xminutes
@@ -364,7 +364,7 @@ func (authSrv *AuthService) generateTokenDetails(userDetails models.User, ipAddr
 }
 
 // Validate the two factor authentication request and complete the authentication request
-func (authSrv *AuthService) ValidateTwoFactor(code, requestId string, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) ValidateTwoFactor(code, requestId string, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	var userId int
 	row := authSrv.db.QueryRow("SELECT user_id FROM two_factor_requests WHERE code = $1 AND request_id = $2 AND expiry_time > NOW() ", code, requestId)
 	row.Scan(&userId)
@@ -382,7 +382,7 @@ func (authSrv *AuthService) ValidateTwoFactor(code, requestId string, ipAddress,
 }
 
 // Delete expired tokens
-func (authSrv *AuthService) DeleteExpiredTokens(days int) error {
+func (authSrv *authService) DeleteExpiredTokens(days int) error {
 	// Deletes User Refresh tokens
 	result, err := authSrv.db.Exec("DELETE FROM user_refresh_tokens WHERE (DATE_PART('day', AGE(NOW()::date ,expiry_time::date))) >= $1", days)
 	if err != nil {
@@ -405,13 +405,13 @@ func (authSrv *AuthService) DeleteExpiredTokens(days int) error {
 }
 
 // Verify the passcode
-func (authSrv *AuthService) VerifyPassCode(userId int, passCode string) bool {
+func (authSrv *authService) VerifyPassCode(userId int, passCode string) bool {
 	userDetails := authSrv.userService.Get(userId)
 	return totp.Validate(passCode, userDetails.TOTPSecret)
 }
 
 // Validates the TOTP before the user finally logs in
-func (authSrv *AuthService) VerifyTOTP(userId int, passCode, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
+func (authSrv *authService) VerifyTOTP(userId int, passCode, ipAddress, userAgent string) (*models.AuthenticationResponse, error) {
 	userDetails := authSrv.userService.Get(userId)
 	if !authSrv.VerifyPassCode(userId, passCode) {
 		return nil, ErrPassCode

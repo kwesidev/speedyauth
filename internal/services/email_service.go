@@ -12,12 +12,12 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-type EmailServiceInterface interface {
+type EmailService interface {
 	SendTwoFactorRequest(randomCodes string, userDetails models.User) error
 	SendEmailLoginRequest(randomCodes string, userDetails models.User) error
 	SendPasswordResetRequest(randomCodes string, userDetails models.User) error
 }
-type EmailService struct {
+type emailService struct {
 	smtpHost         string
 	smtpUsername     string
 	smtpPassword     string
@@ -26,8 +26,8 @@ type EmailService struct {
 	secure           bool
 }
 
-func NewEmailService(secure bool) *EmailService {
-	return &EmailService{
+func NewEmailService(secure bool) EmailService {
+	return &emailService{
 		smtpHost:         os.Getenv("SMTP_HOST"),
 		smtpUsername:     os.Getenv("SMTP_USERNAME"),
 		smtpPort:         os.Getenv("SMTP_PORT"),
@@ -38,7 +38,7 @@ func NewEmailService(secure bool) *EmailService {
 }
 
 // SendEmail funnction sends email directly to an external server
-func (emSrv *EmailService) sendEmail(to []string, subject, message string) error {
+func (emSrv *emailService) sendEmail(to []string, subject, message string) error {
 	portNumber, _ := strconv.Atoi(emSrv.smtpPort)
 	d := gomail.NewDialer(emSrv.smtpHost, portNumber, emSrv.smtpUsername, emSrv.smtpPassword)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: emSrv.secure}
@@ -56,7 +56,7 @@ func (emSrv *EmailService) sendEmail(to []string, subject, message string) error
 }
 
 // SendTwoFactorRequest sends two factor mail
-func (emSrv *EmailService) SendTwoFactorRequest(randomCodes string, userDetails models.User) error {
+func (emSrv *emailService) SendTwoFactorRequest(randomCodes string, userDetails models.User) error {
 	var twoFactorRequestTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
 	emailTemplateFile, err := template.ParseFiles("static/email_templates/TwoFactorLogin.html")
@@ -80,7 +80,7 @@ func (emSrv *EmailService) SendTwoFactorRequest(randomCodes string, userDetails 
 }
 
 // SendTwoFactorRequest sends two factor mail
-func (emSrv *EmailService) SendEmailLoginRequest(randomCodes string, userDetails models.User) error {
+func (emSrv *emailService) SendEmailLoginRequest(randomCodes string, userDetails models.User) error {
 	var twoFactorRequestTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
 	emailTemplateFile, err := template.ParseFiles("static/email_templates/EmailLogin.html")
@@ -105,7 +105,7 @@ func (emSrv *EmailService) SendEmailLoginRequest(randomCodes string, userDetails
 
 // SendPasswordRequest
 // Sends a password request mail to the receiver
-func (emSrv *EmailService) SendPasswordResetRequest(randomCodes string, userDetails models.User) error {
+func (emSrv *emailService) SendPasswordResetRequest(randomCodes string, userDetails models.User) error {
 	var passwordResetTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
 	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")

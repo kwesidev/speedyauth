@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserServiceInterface interface {
+type UserService interface {
 	List(offset int, limit int) ([]models.User, error)
 	Get(userId int) *models.User
 	GetByUsername(username string) *models.User
@@ -25,18 +25,18 @@ type UserServiceInterface interface {
 	Register(userRegistrationRequest models.UserRegistrationRequest) (bool, error)
 }
 
-type UserService struct {
+type userService struct {
 	db *sql.DB
 }
 
-func NewUserService(db *sql.DB) *UserService {
-	return &UserService{
+func NewUserService(db *sql.DB) UserService {
+	return &userService{
 		db: db,
 	}
 }
 
 // List a bunch of users
-func (usrSrv *UserService) List(offset int, limit int) ([]models.User, error) {
+func (usrSrv *userService) List(offset int, limit int) ([]models.User, error) {
 	users := make([]models.User, 0)
 	// Get the list of users
 	queryString :=
@@ -73,7 +73,7 @@ func (usrSrv *UserService) List(offset int, limit int) ([]models.User, error) {
 }
 
 // Get user details based on ID
-func (usrSrv *UserService) Get(userId int) *models.User {
+func (usrSrv *userService) Get(userId int) *models.User {
 	userDetails := &models.User{}
 	queryString :=
 		`SELECT 
@@ -112,7 +112,7 @@ func (usrSrv *UserService) Get(userId int) *models.User {
 }
 
 // GetUsername gets the usersDetails by username
-func (usrSrv *UserService) GetByUsername(username string) *models.User {
+func (usrSrv *userService) GetByUsername(username string) *models.User {
 	var userId int
 	row := usrSrv.db.QueryRow("SELECT id FROM users WHERE username = $1 OR email_address = $1  LIMIT 1 ", username)
 	row.Scan(&userId)
@@ -120,7 +120,7 @@ func (usrSrv *UserService) GetByUsername(username string) *models.User {
 }
 
 // Register a new user
-func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrationRequest) (bool, error) {
+func (usrSrv *userService) Register(userRegistrationRequest models.UserRegistrationRequest) (bool, error) {
 	// Check passwor strength
 	if !utilities.StrongPasswordCheck(userRegistrationRequest.Password) {
 		return false, ErrStrongPassword
@@ -165,7 +165,7 @@ func (usrSrv *UserService) Register(userRegistrationRequest models.UserRegistrat
 }
 
 // GetRoles gets a list of user roles
-func (usrSrv *UserService) GetRoles(userId int) ([]string, error) {
+func (usrSrv *userService) GetRoles(userId int) ([]string, error) {
 	roles := []string{}
 	// Get user roles
 	queryString := `
@@ -192,7 +192,7 @@ func (usrSrv *UserService) GetRoles(userId int) ([]string, error) {
 }
 
 // Update User
-func (usrSrv *UserService) Update(userId int, userUpdateRequest models.UserUpdateRequest) error {
+func (usrSrv *userService) Update(userId int, userUpdateRequest models.UserUpdateRequest) error {
 	query := "UPDATE users SET "
 	var args []any
 	argCount := 1
@@ -241,7 +241,7 @@ func (usrSrv *UserService) Update(userId int, userUpdateRequest models.UserUpdat
 }
 
 // DeleteToken function to delete refresh Token
-func (usrSrv *UserService) DeleteToken(userId int, refreshToken string) (bool, error) {
+func (usrSrv *userService) DeleteToken(userId int, refreshToken string) (bool, error) {
 	if _, err := usrSrv.db.Exec("DELETE FROM user_refresh_tokens WHERE token = $1 AND user_id = $2", refreshToken, userId); err != nil {
 		log.Println(err)
 		return false, err
@@ -250,7 +250,7 @@ func (usrSrv *UserService) DeleteToken(userId int, refreshToken string) (bool, e
 }
 
 // EnableTOTP
-func (usrSrv *UserService) EnableTwoFactorTOTP(userId int) (*models.EnableTOTPResponse, error) {
+func (usrSrv *userService) EnableTwoFactorTOTP(userId int) (*models.EnableTOTPResponse, error) {
 	userDetails := usrSrv.Get(userId)
 	if userDetails.TwoFactorMethod == "TOTP" {
 		return nil, ErrTOTPExists
@@ -284,7 +284,7 @@ func (usrSrv *UserService) EnableTwoFactorTOTP(userId int) (*models.EnableTOTPRe
 }
 
 // EnableTwoFactor SMS OR EMAIL
-func (usrSrv *UserService) EnableTwoFactor(userId int, methodCode string) error {
+func (usrSrv *userService) EnableTwoFactor(userId int, methodCode string) error {
 	queryString :=
 		`UPDATE 
 	        users 
