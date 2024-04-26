@@ -68,6 +68,7 @@ func (usrSrv *userService) List(offset int, limit int) ([]models.User, error) {
 		user.Roles = roles
 		users = append(users, user)
 	}
+	defer rows.Close()
 
 	return users, nil
 }
@@ -187,6 +188,7 @@ func (usrSrv *userService) GetRoles(userId int) ([]string, error) {
 		rows.Scan(&role)
 		roles = append(roles, role)
 	}
+	defer rows.Close()
 	return roles, nil
 
 }
