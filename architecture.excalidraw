@@ -1,7 +1,7 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://excalidraw.com",
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
   "elements": [
     {
       "type": "rectangle",
@@ -98,7 +98,8 @@
       "verticalAlign": "middle",
       "containerId": "h6o2JhhN9HbPCYx8Y07A4",
       "originalText": "Backend",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "rectangle",
@@ -144,8 +145,8 @@
     },
     {
       "type": "text",
-      "version": 304,
-      "versionNonce": 1879117886,
+      "version": 305,
+      "versionNonce": 1250000154,
       "isDeleted": false,
       "id": "JftZXTI-9CcVokvZre1zN",
       "fillStyle": "solid",
@@ -165,7 +166,7 @@
       "frameId": null,
       "roundness": null,
       "boundElements": [],
-      "updated": 1704398882289,
+      "updated": 1712086490083,
       "link": null,
       "locked": false,
       "fontSize": 20,
@@ -175,7 +176,8 @@
       "verticalAlign": "middle",
       "containerId": "WIUrCT5mS-3LM_mnAxaVo",
       "originalText": "AuthServer\n",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 43
     },
     {
       "type": "arrow",
@@ -267,7 +269,8 @@
       "verticalAlign": "middle",
       "containerId": "Zx0zDj4kH-FQuh_jVgz7r",
       "originalText": "login",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -359,7 +362,8 @@
       "verticalAlign": "middle",
       "containerId": "NJCkfvBcZOuD1IF26-Mpf",
       "originalText": "token",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "rectangle",
@@ -440,7 +444,8 @@
       "verticalAlign": "middle",
       "containerId": "W4B7FCKsmDdnb9wGASAR4",
       "originalText": "Front end",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -532,7 +537,8 @@
       "verticalAlign": "middle",
       "containerId": "5DBOwn6KgDcI4E09mq4D2",
       "originalText": "login",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -624,7 +630,8 @@
       "verticalAlign": "middle",
       "containerId": "BZANrkQxtzsHcB_UwTW-S",
       "originalText": "return cookie ",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -745,7 +752,8 @@
       "verticalAlign": "middle",
       "containerId": "xflxPPxxmXGle-FB53zBb",
       "originalText": "Database",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -866,7 +874,8 @@
       "verticalAlign": "middle",
       "containerId": "2o1E6Y_T_ZF0YzWWygt9T",
       "originalText": "Database",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -991,7 +1000,8 @@
       "verticalAlign": "middle",
       "containerId": "m2-b2sgQUgwX1Doep1ewW",
       "originalText": "creates a session for the logged in user and return a cookie",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 118
     },
     {
       "type": "arrow",
@@ -1083,7 +1093,8 @@
       "verticalAlign": "middle",
       "containerId": "Gez63aHHk5OK1umn3HuHJ",
       "originalText": "refresh token",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -1167,7 +1178,8 @@
       "verticalAlign": "middle",
       "containerId": "rsNnIODcEEi82qGsNdDrF",
       "originalText": "logout\n",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 43
     },
     {
       "type": "arrow",
@@ -1255,7 +1267,8 @@
       "verticalAlign": "middle",
       "containerId": "PGrxNRN1PrPzStxghd81K",
       "originalText": "refreshtoken",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 18
     },
     {
       "type": "arrow",
@@ -1341,8 +1354,8 @@
     },
     {
       "type": "text",
-      "version": 16,
-      "versionNonce": 804994710,
+      "version": 23,
+      "versionNonce": 1850762595,
       "isDeleted": false,
       "id": "AdMLccm5z668jExHt3N06",
       "fillStyle": "solid",
@@ -1362,7 +1375,7 @@
       "frameId": null,
       "roundness": null,
       "boundElements": [],
-      "updated": 1711898137052,
+      "updated": 1713707816718,
       "link": null,
       "locked": false,
       "fontSize": 20,
@@ -1372,7 +1385,8 @@
       "verticalAlign": "top",
       "containerId": null,
       "originalText": "SMTP Server",
-      "lineHeight": 1.25
+      "lineHeight": 1.25,
+      "baseline": 17
     }
   ],
   "appState": {
