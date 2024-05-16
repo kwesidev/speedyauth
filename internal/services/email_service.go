@@ -13,9 +13,9 @@ import (
 )
 
 type EmailService interface {
-	SendTwoFactorRequest(randomCodes string, userDetails models.User) error
-	SendEmailLoginRequest(randomCodes string, userDetails models.User) error
-	SendPasswordResetRequest(randomCodes string, userDetails models.User) error
+	SendTwoFactorRequest(randomCode string, userDetails models.User) error
+	SendEmailLoginRequest(randomCode string, userDetails models.User) error
+	SendPasswordResetRequest(randomCode string, userDetails models.User) error
 }
 type emailService struct {
 	smtpHost         string
@@ -56,7 +56,7 @@ func (emSrv *emailService) sendEmail(to []string, subject, message string) error
 }
 
 // SendTwoFactorRequest sends two factor mail
-func (emSrv *emailService) SendTwoFactorRequest(randomCodes string, userDetails models.User) error {
+func (emSrv *emailService) SendTwoFactorRequest(randomCode string, userDetails models.User) error {
 	var twoFactorRequestTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
 	emailTemplateFile, err := template.ParseFiles("static/email_templates/TwoFactorLogin.html")
@@ -68,7 +68,7 @@ func (emSrv *emailService) SendTwoFactorRequest(randomCodes string, userDetails 
 		FullName   string
 		RandomCode string
 	}{}
-	emailTemplateData.RandomCode = randomCodes
+	emailTemplateData.RandomCode = randomCode
 	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
 	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
 	recipient := []string{userDetails.EmailAddress}
@@ -80,7 +80,7 @@ func (emSrv *emailService) SendTwoFactorRequest(randomCodes string, userDetails 
 }
 
 // SendTwoFactorRequest sends two factor mail
-func (emSrv *emailService) SendEmailLoginRequest(randomCodes string, userDetails models.User) error {
+func (emSrv *emailService) SendEmailLoginRequest(randomCode string, userDetails models.User) error {
 	var twoFactorRequestTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
 	emailTemplateFile, err := template.ParseFiles("static/email_templates/EmailLogin.html")
@@ -92,7 +92,7 @@ func (emSrv *emailService) SendEmailLoginRequest(randomCodes string, userDetails
 		FullName   string
 		RandomCode string
 	}{}
-	emailTemplateData.RandomCode = randomCodes
+	emailTemplateData.RandomCode = randomCode
 	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
 	tmpl.Execute(&twoFactorRequestTemplateBuffer, emailTemplateData)
 	recipient := []string{userDetails.EmailAddress}
@@ -105,7 +105,7 @@ func (emSrv *emailService) SendEmailLoginRequest(randomCodes string, userDetails
 
 // SendPasswordRequest
 // Sends a password request mail to the receiver
-func (emSrv *emailService) SendPasswordResetRequest(randomCodes string, userDetails models.User) error {
+func (emSrv *emailService) SendPasswordResetRequest(randomCode string, userDetails models.User) error {
 	var passwordResetTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
 	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")
@@ -118,7 +118,7 @@ func (emSrv *emailService) SendPasswordResetRequest(randomCodes string, userDeta
 		FullName   string
 		RandomCode string
 	}{}
-	emailTemplateData.RandomCode = randomCodes
+	emailTemplateData.RandomCode = randomCode
 	emailTemplateData.FullName = userDetails.FirstName + " " + userDetails.LastName
 	tmpl.Execute(&passwordResetTemplateBuffer, emailTemplateData)
 	recipient := []string{userDetails.EmailAddress}
