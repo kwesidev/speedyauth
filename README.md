@@ -2,7 +2,7 @@
 # SpeedyAuth
 ![example workflow](https://github.com/kwesidev/authserver/actions/workflows/go.yml/badge.svg)
 
-An API-only standalone authentication server that streamlines the user authentication process.
+API-only standalone authentication server that streamlines the user authentication process.
 
 ## Features
 - Issuing Access Tokens and Refresh Tokens
