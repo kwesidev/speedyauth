@@ -2,7 +2,7 @@ include .env
 all: clean buildserver
 
 run:
-	go run main.go
+	go run ./cmd/speedy_auth/main.go
 
 buildserver:
 	go build ./cmd/speedy_auth
