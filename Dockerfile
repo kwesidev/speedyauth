@@ -15,7 +15,6 @@ FROM alpine:3.14
 RUN apk add --no-cache bash
 RUN apk add tzdata
 COPY --from=build_base /tmp/speedy_auth/speedy_auth /app/speedy_auth
-COPY --from=build_base /tmp/speedy_auth/static/email_templates/* /static/email_templates/
 RUN cp /usr/share/zoneinfo/Africa/Johannesburg /etc/localtime
 RUN echo "Africa/Johannesburg" >  /etc/timezone
 RUN cd /app

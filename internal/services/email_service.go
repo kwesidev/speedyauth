@@ -3,6 +3,7 @@ package services
 import (
 	"bytes"
 	"crypto/tls"
+	"embed"
 	"html/template"
 	"log"
 	"os"
@@ -11,6 +12,9 @@ import (
 	"github.com/kwesidev/speedyauth/internal/models"
 	"gopkg.in/gomail.v2"
 )
+
+//go:embed email_templates
+var staticFS embed.FS
 
 type EmailService interface {
 	SendTwoFactorRequest(randomCode string, userDetails models.User) error
@@ -59,7 +63,7 @@ func (emSrv *emailService) sendEmail(to []string, subject, message string) error
 func (emSrv *emailService) SendTwoFactorRequest(randomCode string, userDetails models.User) error {
 	var twoFactorRequestTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
-	emailTemplateFile, err := template.ParseFiles("static/email_templates/TwoFactorLogin.html")
+	emailTemplateFile, err := template.ParseFS(staticFS, "email_templates/TwoFactorLogin.html")
 	if err != nil {
 		return err
 	}
@@ -83,7 +87,7 @@ func (emSrv *emailService) SendTwoFactorRequest(randomCode string, userDetails m
 func (emSrv *emailService) SendEmailLoginRequest(randomCode string, userDetails models.User) error {
 	var twoFactorRequestTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
-	emailTemplateFile, err := template.ParseFiles("static/email_templates/EmailLogin.html")
+	emailTemplateFile, err := template.ParseFS(staticFS, "email_templates/EmailLogin.html")
 	if err != nil {
 		return err
 	}
@@ -108,7 +112,7 @@ func (emSrv *emailService) SendEmailLoginRequest(randomCode string, userDetails 
 func (emSrv *emailService) SendPasswordResetRequest(randomCode string, userDetails models.User) error {
 	var passwordResetTemplateBuffer bytes.Buffer
 	// Get email template from directory and assign random code to it
-	emailTemplateFile, err := template.ParseFiles("static/email_templates/PasswordRequest.html")
+	emailTemplateFile, err := template.ParseFS(staticFS, "email_templates/PasswordRequest.html")
 	if err != nil {
 		log.Println("Template reading ", err)
 		return err
