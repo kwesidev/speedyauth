@@ -132,6 +132,10 @@ func (usrSrv *userService) Register(userRegistrationRequest models.UserRegistrat
 		return false, err
 	}
 	tx, err := usrSrv.db.Begin()
+	if err != nil {
+		log.Println("Failed to start transaction")
+		return false, ErrRegistration
+	}
 	defer tx.Rollback()
 	queryString := `
     	INSERT INTO users
