@@ -48,6 +48,7 @@ spec:
             - name: TOKEN_EXPIRY_TIME
               value: 15m
           image: ghcr.io/kwesidev/speedyauth:latest
+          imagePullPolicy: Always
           name: app
           ports:
             - containerPort: 8080
