@@ -17,7 +17,7 @@ var databaseConnection *sql.DB
 const SERVER_VERSION = "0.1.1"
 
 // initializes the database connections and other connections
-func initialize() {
+func init() {
 
 	err := godotenv.Load()
 	if err != nil {
@@ -68,7 +68,6 @@ func initialize() {
 	log.Println("")
 }
 func main() {
-	initialize()
 	apiServer := apiserver.NewAPIServer(os.Getenv("SERVER_ADDRESS"), os.Getenv("SERVER_PORT"), databaseConnection)
 	apiServer.Run()
 }
